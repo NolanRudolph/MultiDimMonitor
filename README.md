@@ -9,7 +9,7 @@
 
 **Setup**
 1. Begin in your home directory 
-2. Clone this repository: https://github.com/NolanRudolph/MultiDimSnabb.git
+2. Clone this repository: https://github.com/NolanRudolph/MultiDimMonitor.git
 3. Clone the snabb repository: https://github.com/snabbco/snabb.git
 4. cd MultiDimMonitor
 5. bash debian_install_cassandra.sh (if NOT debian, follow http://cassandra.apache.org/download/)
