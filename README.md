@@ -6,8 +6,8 @@ Simple UDP packet generator for sending and receiving small bits of data. Create
 3. Apache Cassandra
 
 (1) One can easily create this requirement by following the "How do I get started?" section from Snabb's GitHub: https://github.com/snabbco/snabb.git.  
-(2) The list of compatible NICs is provided by this link: https://github.com/snabbco/snabb/blob/master/src/lib/hardware/pci.lua, line 61.
-(3) See number 5. in **Setup**
+(2) The list of compatible NICs is provided by this link: https://github.com/snabbco/snabb/blob/master/src/lib/hardware/pci.lua, line 61.  
+(3) See number 5. in **Setup**  
 
 **Setup**
 1. Begin in your home directory 
