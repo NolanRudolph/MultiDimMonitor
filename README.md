@@ -14,7 +14,7 @@ Simple UDP packet generator for sending and receiving small bits of data. Create
 2. Clone this repository: https://github.com/NolanRudolph/MultiDimSnabb.git
 3. Clone the snabb repository: https://github.com/snabbco/snabb.git
 4. cd MultiDimMonitor
-5. (If debian) bash debian_install_cassandra.sh, otherwise follow http://cassandra.apache.org/download/
+5. bash debian_install_cassandra.sh, (if NOT debian, follow http://cassandra.apache.org/download/)
 6. cd Snabb; bash automake.sh
 7. A binary executable named "snabb" can be found in ~/snabb/src. Call ```~/snabb/src/snabb MultiDimSnabb``` to acquire instructions on how to run my program
 
