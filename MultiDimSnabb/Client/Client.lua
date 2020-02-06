@@ -49,12 +49,43 @@ function Incubator:new(args)
 
 	print("My latency is " .. tostring(latency))
 
+	--[[ TEMPORARY UNTIL IEEE 802.1Q IS FIXED ]]--
+	local ether = ethernet:new(
+        {
+                src = ethernet:pton(dst_eth),
+		dst = ethernet:pton(src_eth),
+                -- VLAN Ethernet Type
+                type = 0x8100
+        })
+
+        local ip = ipv4:new(
+        {
+                ihl = 0x4500,
+                dscp = 1,
+                ttl = 255,
+                protocol = 17
+        })
+
+        local udp = _udp:new(
+        {
+                src_port = 123,
+                dst_port = 456
+        })
+
+	local ret_gram = datagram:new()
+	ret_gram:push(udp)
+	ret_gram:push(ip)
+	ret_gram:push(ether)
+
         local o =
-	{
-		src_eth = src_eth,
-		dst_eth = dst_eth,
+        {
+                eth = ether,
+                ip = ip,
+                udp = udp,
+		p = ret_gram:packet(),
+                dgram = datagram:new(),
 		latency = latency
-	}
+        }
 
 	return setmetatable(o, {__index = Incubator})
 end
@@ -65,42 +96,10 @@ function Incubator:pull()
 	local i = self.input.input
 	local o = self.output.output
 	while not link.empty(i) do
-		return_packet(i, o, self.src_eth, self.dst_eth, self.latency)
+		local p = link.receive(i)
+		link.transmit(o, packet.clone(self.p))
 	end
 end
-
-function return_packet(i, o, src, dst, lat)
-	local p = link.receive(i)
-
-	local dgram = datagram:new(p, ethernet)
-	dgram:parse_n(3)
-	
-	local eth, ip, udp = unpack(dgram:stack())
-	
-	-- Check to make sure packet is from host
-	local rec_src = tostring(ethernet:ntop(eth:src()))
-	local rec_dst = tostring(ethernet:ntop(eth:dst()))
-	if rec_dst ~= src or rec_src ~= dst then
-		return
-	end
-	print("Received packet from server.")
-
-	-- Change Ethernet src and dst (dst just becomes src)
-	eth:swap()
-
-	local ret_gram = dgram:new()
-	ret_gram:push(udp)
-	ret_gram:push(ip)
-	ret_gram:push(eth)
-
-	os.execute("sleep " .. lat)
-	print("Transmitting back to server.")
-	-- Transmit packet back to server
-	link.transmit(o, packet.clone(dgram:packet()))
-
-	return
-end
-
 
 function show_usage(code)
 	print(require("program.MultiDimSnabb.Client.README_inc"))
@@ -131,8 +130,12 @@ function run(args)
 	config.link(c, "socket.tx -> incubator.input")
 	config.link(c, "incubator.output -> socket.rx")
 
+	print("Config 1")
 	engine.busywait = true
+	print("Config 2")
 	engine.configure(c)
+	print("Config 3")
 	engine.main({report = {showlinks = true}})
+	print("Config 4")
 	
 end
