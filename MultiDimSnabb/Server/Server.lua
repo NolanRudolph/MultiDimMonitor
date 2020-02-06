@@ -190,18 +190,5 @@ function run(args)
 	engine.configure(c)
 	engine.main({duration = 100})
 	
-	local low = 100
-	local low_i = 0
-	local i = 0
-	for _, v in pairs(net_eths) do
-		print("Node " .. tostring(i) .. " : " .. tostring(v))
-		if v < low then
-			low = v
-			low_i = i
-		end
-		i = i + 1
-	end
-
-	local ms_low = low * 1000
-	print(string.format("Best Connection: Node %d at %.2f ms", low_i, ms_low))
+	print("Completed 100s.")
 end
