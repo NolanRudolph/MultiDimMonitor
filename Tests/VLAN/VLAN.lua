@@ -27,8 +27,8 @@ Generator = {}
 function Generator:new(args)
 	local ether = ethernet:new(
 	{
-		src = ethernet:pton("02:e7:47:e5:74:36"),
-		dst = ethernet:pton("02:a1:67:21:50:d6"),
+		src = ethernet:pton("02:05:ce:39:36:d3"),
+		dst = ethernet:pton("02:9d:38:37:70:8b"),
 		type = 0x800
 	})
 
@@ -77,13 +77,13 @@ function run(args)
 	config.app(c, "generator", Generator)
 
 	local RawSocket = raw_sock
-	config.app(c, "server", RawSocket, "vlan1118")
+	config.app(c, "server", RawSocket, "vlan922")
 
 	config.link(c, "generator.output -> server.rx")
 
 	engine.busywait = true
 	engine.configure(c)
-	engine.main({duration = 5})
+	engine.main({duration = 5, report = {showlinks = true}})
 	
 	print("Completed.")
 end
