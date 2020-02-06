@@ -25,9 +25,9 @@ Generator = {}
 function Generator:new(args)
 	local ether = ethernet:new(
 	{
-		src = ethernet:pton("02:05:ce:39:36:d3"),
-		dst = ethernet:pton("02:9d:38:37:70:8b"),
-		type = 0x800
+		src = ethernet:pton("02:bf:b5:b8:0e:28"),
+		dst = ethernet:pton("02:ee:8b:8b:0c:46"),
+		type = 0x8100
 	})
 
 	local ip = ipv4:new(
@@ -72,7 +72,7 @@ function run(args)
 	config.app(c, "generator", Generator)
 
 	local RawSocket = raw_sock
-	config.app(c, "server", RawSocket, "vlan922")
+	config.app(c, "server", RawSocket, "vlan916")
 
 	config.link(c, "generator.output -> server.rx")
 

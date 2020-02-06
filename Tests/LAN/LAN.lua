@@ -27,15 +27,15 @@ Generator = {}
 function Generator:new(args)
 	local ether = ethernet:new(
 	{
-		src = ethernet:pton("02:ad:a9:c3:e8:76"),
-		dst = ethernet:pton("02:4a:db:e1:03:d4"),
+		src = ethernet:pton("02:bf:b5:b8:0e:28"),
+		dst = ethernet:pton("02:c1:ca:2f:b8:f8"),
 		type = 0x800
 	})
 
 	local ip = ipv4:new(
 	{
-		src = ipv4:pton("192.168.3.1"),
-		dst = ipv4:pton("192.168.3.2"),
+		src = ipv4:pton("192.168.1.1"),
+		dst = ipv4:pton("192.168.1.2"),
 		ihl = 0x4500,
 		dscp = 1,
 		ttl = 255,
@@ -77,7 +77,7 @@ function run(args)
 	config.app(c, "generator", Generator)
 
 	local RawSocket = raw_sock
-	config.app(c, "server", RawSocket, "vlan917")
+	config.app(c, "server", RawSocket, "vlan916")
 
 	config.link(c, "generator.output -> server.rx")
 
