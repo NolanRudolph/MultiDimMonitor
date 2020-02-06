@@ -7,8 +7,6 @@ local lib        = require("core.lib")
 -- App association requirements
 local app        = require("core.app")
 local link       = require("core.link")
-local Intel82599 = require("apps.intel_mp.intel_mp").Intel82599
-local LoadGen    = require("apps.intel_mp.loadgen").LoadGen
 local raw_sock   = require("apps.socket.raw").RawSocket
 
 -- Packet creation requirements
@@ -34,8 +32,8 @@ function Generator:new(args)
 
 	local ip = ipv4:new(
 	{
-		src = ipv4:pton("192.168.1.1"),
-		dst = ipv4:pton("192.168.1.2"),
+		src = ipv4:pton("10.10.1.1"),
+		dst = ipv4:pton("10.10.1.2"),
 		ihl = 0x4500,
 		dscp = 1,
 		ttl = 255,
@@ -44,30 +42,27 @@ function Generator:new(args)
 
 	local udp = _udp:new(
 	{
-		src_port = 1212,
-		dst_port = 1313
+		src_port = 1313,
+		dst_port = 1515
 	})
+
+	local p = datagram:new()
+	p:push(udp)
+	p:push(ip)
+	p:push(ether)
 
 	local o = 
 	{ 
-		eth = ether,
-		ip = ip,
-		udp = udp,
-		dgram = datagram:new(),
+		p = p:packet()
 	}
+	
 
 	return setmetatable(o, {__index = Generator})
 end
 
 function Generator:pull()
 	print("Pinging...")
-
-	self.dgram = datagram:new()
-	self.dgram:push(self.udp)
-	self.dgram:push(self.ip)
-	self.dgram:push(self.eth)
-
-	link.transmit(self.output.output, self.dgram:packet())
+	link.transmit(self.output.output, packet.clone(self.p))
 	return
 end
 
