@@ -44,11 +44,9 @@ function Generator:new(args)
 	local num_nodes = tonumber(io.read())
 
 	local dst_eths = {}
-	local last_eths = {}
 	for i = 1, num_nodes do
 		local rec = io.read()
 		table.insert(dst_eths, ethernet:pton(rec))
-		last_eths[rec] = 0
 		net_eths[rec] = 0
 	end
 
@@ -85,7 +83,6 @@ function Generator:new(args)
 		nodes = dst_eths,
 		num_nodes = num_nodes,
 		cur_node = 1,
-		last_eths = last_eths,
 		wait = 0
 	}
 
@@ -102,7 +99,7 @@ function Generator:gen_packet()
 	self.dgram:push(self.ip)
 	self.dgram:push(self.eth)
 
-	self.last_eths[ethernet:ntop(addr)] = os.clock()
+	net_eths[ethernet:ntop(addr)] = os.clock()
 	link.transmit(self.output.output, self.dgram:packet())
 	
 	if self.cur_node == self.num_nodes then
@@ -115,11 +112,28 @@ function Generator:gen_packet()
 end
 
 function Generator:pull()
-	if self.wait ~= 100000 then
-		self.wait = self.wait + 1
-	else
-		self:gen_packet()
+	if self.wait == 400000 then
 		self.wait = 0
+		i = 0
+		best_i = 0
+		best = 100
+		print("\n------- TIMES --------")
+		for _, t in pairs(net_eths) do
+			i = i + 1
+			if t < best then
+				best_i = i
+				best = t
+			end	
+			print("Replica" .. i .. " : " .. t)
+		end
+		print("----------------------")
+		print("BEST NODE: Replica" .. best_i)
+		print("----------------------\n")
+	elseif self.wait % 100000 == 0 then
+		self.wait = self.wait + 1
+		self:gen_packet()
+	else
+		self.wait = self.wait + 1
 	end
 end
 
@@ -139,17 +153,11 @@ function Generator:push()
 
 		if net_eths[eth_src] then
 			-- Get the net time the request took
-			local net = temp_time - self.last_eths[eth_src]
-			-- Take the average of the recorded times
-			if net_eths[eth_src] ~= 0 then
-				net_eths[eth_src] = (net_eths[eth_src] + net) / 2
-			else
-				net_eths[eth_src] = net
-			end
+			net_eths[eth_src] = temp_time - net_eths[eth_src]
 		end
 
 		packet.free(p)
-end
+	end
 end
 
 function show_usage(code)
@@ -180,7 +188,7 @@ function run(args)
 
 	engine.busywait = true
 	engine.configure(c)
-	engine.main({duration = 10})
+	engine.main({duration = 100})
 	
 	local low = 100
 	local low_i = 0
