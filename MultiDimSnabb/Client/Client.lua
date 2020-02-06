@@ -31,23 +31,18 @@ dataset = {}
 function Incubator:new(args)
 	local src_eth = args["src_eth"]
         local dst_eth = args["dst_eth"]
-	local latency = tonumber(args["latency"])
 	local disktype = args["disktype"]
 
-	-- Latency will be x2 b/c A -> B + B -> A
-	latency = latency * 2
-
+	local access_time = 0
 	-- Disk access time
 	if disktype == "HDD" then
-		latency = latency + 0.005
+		access_time = 0.005
 	elseif disktype == "SSD" then
-		latency = latency + 0.0000001
+		access_time = 0.0000001
 	else
 		print("Unknown disk type.")
 		main.exit(1)
 	end
-
-	print("My latency is " .. tostring(latency))
 
 	--[[ TEMPORARY UNTIL IEEE 802.1Q IS FIXED ]]--
 	local ether = ethernet:new(
@@ -84,7 +79,7 @@ function Incubator:new(args)
                 udp = udp,
 		p = ret_gram:packet(),
                 dgram = datagram:new(),
-		latency = latency
+		access_time = access_time
         }
 
 	return setmetatable(o, {__index = Incubator})
@@ -97,6 +92,7 @@ function Incubator:pull()
 	local o = self.output.output
 	while not link.empty(i) do
 		local p = link.receive(i)
+		os.execute("sleep " .. self.access_time)
 		link.transmit(o, packet.clone(self.p))
 	end
 end
@@ -107,14 +103,13 @@ function show_usage(code)
 end
 
 function run(args)
-	if #args ~= 5 then show_usage(1) end
+	if #args ~= 4 then show_usage(1) end
 	local c = config.new()
 
 	local src_eth  = args[1]
 	local dst_eth  = args[2]
 	local IF       = args[3]
-	local latency  = args[4]
-	local disktype = args[5]
+	local disktype = args[4]
 
 	local RawSocket = raw_sock.RawSocket
 	config.app(c, "socket", RawSocket, IF)
@@ -123,19 +118,14 @@ function run(args)
 	{
 		src_eth = src_eth,
 		dst_eth = dst_eth,
-		latency = latency,
 		disktype = disktype
 	})
 
 	config.link(c, "socket.tx -> incubator.input")
 	config.link(c, "incubator.output -> socket.rx")
 
-	print("Config 1")
 	engine.busywait = true
-	print("Config 2")
 	engine.configure(c)
-	print("Config 3")
 	engine.main({report = {showlinks = true}})
-	print("Config 4")
 	
 end
