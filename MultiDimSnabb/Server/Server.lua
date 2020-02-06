@@ -58,7 +58,8 @@ function Generator:new(args)
 	local ether = ethernet:new(
 	{
 		src = ethernet:pton(src_eth),
-		type = 0x800
+		-- VLAN Ethernet Type
+		type = 0x8100
 	})
 
 	local ip = ipv4:new(
