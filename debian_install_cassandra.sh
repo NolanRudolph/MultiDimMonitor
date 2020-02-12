@@ -7,8 +7,8 @@ curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
 sudo apt-get update;
 sudo apt-get install cassandra;
 # Replace existing cassandra files with pre-configured YAML files
-cat cassandra.yaml > /etc/cassandra/cassandra.yaml
-cat cassandra-env.yaml > /etc/cassandra/cassandra-env.yaml
+cat ./Cassandra/cassandra.yaml > /etc/cassandra/cassandra.yaml
+cat ./Cassandra/cassandra-env.yaml > /etc/cassandra/cassandra-env.yaml
 # If all goes well, the following command should not return an error
 nodetool status;
 # If this returns error "Cassandra Failed to connect to '127.0.0.1:7199' Connection refused."
