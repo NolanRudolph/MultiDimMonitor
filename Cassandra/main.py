@@ -20,11 +20,12 @@ def main():
     # Switch to this keyspace
     session.execute("USE synch_keys")
     # Create Table in new keyspace
-    session.execute("CREATE TABLE main (key text PRIMARY KEY, value text)")
+    session.execute("CREATE TABLE IF NOT EXISTS main (key text PRIMARY KEY, value text)")
     # Add some entries
     session.execute("INSERT INTO main (key, value) VALUES ('test1', 'result1')")
     session.execute("INSERT INTO main (key, value) VALUES ('test2', 'result2')")
     session.execute("INSERT INTO main (key, value) VALUES ('test3', 'result3')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test4', 'result4')")
 
     return 0
 
