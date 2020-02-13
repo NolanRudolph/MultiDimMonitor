@@ -8,6 +8,7 @@
 echo "deb http://www.apache.org/dist/cassandra/debian 311x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
 
 # Add key
+echo "Adding Apache Cassandra to known keys via curl..."
 echo "IF THIS TAKES MORE THAN TEN SECONDS, RESTART THIS SCRIPT"
 curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
 
