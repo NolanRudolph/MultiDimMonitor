@@ -43,3 +43,5 @@ then
     echo "Installing cassandra-driver...";
     sudo apt install cassandra-driver;
 fi
+
+echo "Finished Setup."
