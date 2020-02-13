@@ -14,7 +14,7 @@ curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
 sudo apt update;
 
 # Install cassandra if not already installed
-if [ -z (which cassandra) ]
+if [ -z $(which cassandra) ]
 then
     echo "Installing cassandra...";
     sudo apt install cassandra;
