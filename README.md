@@ -8,9 +8,9 @@
 1. Begin in your home directory 
 2. Clone this repository: https://github.com/NolanRudolph/MultiDimMonitor.git
 3. Clone the snabb repository: https://github.com/snabbco/snabb.git
-4. cd MultiDimMonitor
-5. bash setup.sh (if NOT debian, see comments in bash file)
-6. cd MultiDimSnabb; bash automake.sh
+4. ```cd MultiDimMonitor```
+5. ```bash setup.sh``` (if NOT debian, see comments in bash file)
+6. ```cd MultiDimSnabb; bash automake.sh```
 7. A binary executable named "snabb" can be found in ~/snabb/src. Call ```~/snabb/src/snabb MultiDimSnabb``` to acquire instructions on how to run my program
 
 **Client**  
