@@ -12,13 +12,17 @@ from cassandra.cluster import Cluster
 # _._.4.2: Replica3-Side IP to Server
 
 def main():          
-    cluster = Cluster(["192.168.1.1", "192.168.1.2", "192.168.2.1", "192.168.2.2", \
-                       "192.168.3.1", "192.168.3.2", "192.168.4.1", "192.168.4.2"])
+    cluster = Cluster()
+
+    session = cluster.connect("test_keyspace")
+
+    # cluster = cluster(["192.168.1.1", "192.168.1.2", "192.168.2.1", "192.168.2.2", \
+    #                   "192.168.3.1", "192.168.3.2", "192.168.4.1", "192.168.4.2"])
     
-    session = cluster.connect("nodes")
+    for row in rows:
+        print row.first_name, row.last_name
 
+    return 0
 
-    return
-
-if __name__ == "__main__":
+if __name__ == "__cassandra__":
     main()
