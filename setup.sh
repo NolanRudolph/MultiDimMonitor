@@ -9,7 +9,7 @@ echo "deb http://www.apache.org/dist/cassandra/debian 311x main" >> /etc/apt/sou
 
 # Add key
 echo "IF THIS TAKES MORE THAN TEN SECONDS, RESTART THIS SCRIPT"
-curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add - > /dev/null;
+curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
 
 # Update system to not ruin user's computer
 sudo apt update;
