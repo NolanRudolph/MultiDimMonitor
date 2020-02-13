@@ -3,7 +3,7 @@
 from cassandra.cluster import Cluster
 
 def main():
-    # Create a cluster with local host as the solo IP
+    # Create a cluster with all other nodes
     # 192.168.1.0: Client    (Makes request)
     # 192.168.1.1: Server    (Receives requests)
     # 192.168.1.2: Replica 1 (Holds database @ Wiscounsin)
@@ -15,11 +15,12 @@ def main():
     session = cluster.connect()
 
     # Create Keyspace on all nodes
-    session.execute("CREATE KEYSPACE synch_keys IF NOT EXISTS synch_keys")
+    session.execute("CREATE KEYSPACE IF NOT EXISTS synch_keys WITH REPLICATION = \
+                     {'class': 'SimpleStrategy', 'replication_factor': 3}")
     # Switch to this keyspace
     session.execute("USE synch_keys")
     # Create Table in new keyspace
-    session.execute("CREATE TABLE main (key text, value text) IF NOT EXISTS main")
+    session.execute("CREATE TABLE main (key text PRIMARY KEY, value text)")
     # Add some entries
     session.execute("INSERT INTO main (key, value) VALUES ('test1', 'result1')")
     session.execute("INSERT INTO main (key, value) VALUES ('test2', 'result2')")
