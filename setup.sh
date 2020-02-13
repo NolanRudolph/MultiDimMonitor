@@ -8,7 +8,8 @@
 echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list;
 
 # Add key
-curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
+echo "IF THIS TAKES MORE THAN TEN SECONDS, RESTART THIS SCRIPT"
+curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add - > /dev/null;
 
 # Update system to not ruin user's computer
 sudo apt update;
@@ -22,7 +23,7 @@ fi
 
 # Replace existing cassandra files with pre-configured YAML files
 cat ./Cassandra/cassandra.yaml > /etc/cassandra/cassandra.yaml;
-cat ./Cassandra/cassandra-env.yaml > /etc/cassandra/cassandra-env.yaml;
+cat ./Cassandra/cassandra-env.sh > /etc/cassandra/cassandra-env.sh;
 
 # If all goes well, the following command should not return an error
 nodetool status;
