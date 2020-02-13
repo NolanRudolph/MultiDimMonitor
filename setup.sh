@@ -17,7 +17,7 @@ sudo apt update;
 if [ -z $(which cassandra) ]
 then
     echo "Installing cassandra...";
-    sudo apt install -y cassandra;
+    sudo apt-get install -y cassandra > /dev/null;
 fi
 
 # Replace existing cassandra files with pre-configured YAML files
@@ -34,14 +34,14 @@ nodetool status;
 if [ -z $(which pip) ]
 then
     echo "Installing pip...";
-    sudo apt install -y python-pip;
+    sudo apt-get install -y python-pip > /dev/null;
 fi
 
 # Install cassandra-driver if not already installed
 if [ -z $(which cassandra-driver) ]
 then
     echo "Installing cassandra-driver...";
-    sudo pip install cassandra-driver;
+    sudo pip install cassandra-driver > /dev/null;
 fi
 
 echo "Finished Setup."
