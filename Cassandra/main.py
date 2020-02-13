@@ -21,9 +21,9 @@ def main():
     # Create Table in new keyspace
     session.execute("CREATE TABLE main (key text, value text) IF NOT EXISTS main")
     # Add some entries
-    session.execute("INSERT INTO main (key, value) VALUES (test1, result1)")
-    session.execute("INSERT INTO main (key, value) VALUES (test2, result2)")
-    session.execute("INSERT INTO main (key, value) VALUES (test3, result3)")
+    session.execute("INSERT INTO main (key, value) VALUES ('test1', 'result1')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test2', 'result2')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test3', 'result3')")
 
     return 0
 
