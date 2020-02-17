@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="./MultiDimMonitorSketch.png">
+<p align="center">
+  <img width="360" height="480" src="./MultiDimMonitorSketch.png">
 </p>
 
 **Requirements** 
