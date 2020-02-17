@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./MultiDimMonitorSketch.png">
+</p>
+
 **Requirements** 
 1. Snabb binary file 
 2. Snabb compatible NIC
