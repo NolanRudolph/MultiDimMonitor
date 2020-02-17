@@ -2,23 +2,32 @@
 
 from cassandra.cluster import Cluster
 
-# _._.1.1: Server-Side IP to Client
-# _._.1.2: Client-Side IP to Server
-# _._.2.1: Server-Side IP to Replica 1
-# _._.2.2: Replica1-Side IP to Server
-# _._.3.1: Server-Side IP to Replica 2
-# _._.3.2: Replica2-Side IP to Server
-# _._.4.1: Server-Side IP to Replica 3
-# _._.4.2: Replica3-Side IP to Server
+def main():
+    # Create a cluster with all other nodes
+    # 192.168.1.0: Client    (Makes request)
+    # 192.168.1.1: Server    (Receives requests)
+    # 192.168.1.2: Replica 1 (Holds database @ Wiscounsin)
+    # 192.168.1.3: Replica 2 (Holds database @ Wiscounsin)
+    # 192.168.1.4: Replica 3 (Holds database @ Clemson)
+    # 192.168.1.5: Replica 4 (Holds database @ Clemson)
+    cluster = Cluster(['192.168.1.0', '192.168.1.1', '192.168.1.2', \
+                       '192.168.1.3', '192.168.1.4', '192.168.1.5'])
+    session = cluster.connect()
 
-def main():          
-    cluster = Cluster(["192.168.1.1", "192.168.1.2", "192.168.2.1", "192.168.2.2", \
-                       "192.168.3.1", "192.168.3.2", "192.168.4.1", "192.168.4.2"])
-    
-    session = cluster.connect("nodes")
+    # Create Keyspace on all nodes
+    session.execute("CREATE KEYSPACE IF NOT EXISTS synch_keys WITH REPLICATION = \
+                     {'class': 'SimpleStrategy', 'replication_factor': 3}")
+    # Switch to this keyspace
+    session.execute("USE synch_keys")
+    # Create Table in new keyspace
+    session.execute("CREATE TABLE IF NOT EXISTS main (key text PRIMARY KEY, value text)")
+    # Add some entries
+    session.execute("INSERT INTO main (key, value) VALUES ('test1', 'result1')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test2', 'result2')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test3', 'result3')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test4', 'result4')")
 
-
-    return
+    return 0
 
 if __name__ == "__main__":
     main()

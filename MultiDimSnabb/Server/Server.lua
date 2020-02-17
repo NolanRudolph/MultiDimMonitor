@@ -141,20 +141,26 @@ function Generator:push()
 	assert(self.input.input, "Could not locate input port.")
 	local i = self.input.input
 	while not link.empty(i) do
-		print("Received packet.")
-		local p = link.receive(i)
 		local temp_time = os.clock()
+		local p = link.receive(i)
 
 		local dgram = datagram:new(p, ethernet)
 		dgram:parse_n(3)
 
-		local eth, _, _ = unpack(dgram:stack())
+		local eth, ip, _ = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
-
-		if net_eths[eth_src] then
-			-- Get the net time the request took
-			net_eths[eth_src] = temp_time - net_eths[eth_src]
-		end
+        --local proto = ip:protocol()
+        --print("Proto is " .. tostring(proto))
+        
+        --for key, _ in pairs(net_eths) do
+        --    if key == eth_src then
+                -- Get the net time the request took
+        --        print("Eth: " .. eth_src .. " (" .. net_eths[eth_src] .. ", " .. temp_time .. ")")
+        if net_eths[eth_src] then
+            net_eths[eth_src] = temp_time - net_eths[eth_src]
+        end
+        --    end
+        --end
 
 		packet.free(p)
 	end
