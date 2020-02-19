@@ -67,22 +67,20 @@ function Generator:new(args)
         dst = ipv4:ntop("192.168.1.4"),
 		--dscp = 1,
 		ttl = 255,
-		--protocol = 17
+		protocol = 17
 	})
 
---[[
 	local udp = _udp:new(
 	{
 		src_port = 7000,
 		dst_port = 7000
 	})
---]]
 
 	local o = 
 	{ 
 		eth = ether,
 		ip = ip,
-		--udp = udp,
+		udp = udp,
 		nodes = dst_eths,
 		num_nodes = num_nodes,
 		cur_node = 1,
@@ -98,7 +96,7 @@ function Generator:gen_packet()
 
 	self.eth:dst(addr)
     local dgram = datagram:new()
-	--self.dgram:push(self.udp)
+	dgram:push(self.udp)
 	dgram:push(self.ip)
     dgram:push(self.eth)
 
@@ -159,11 +157,9 @@ function Generator:push()
 		local eth = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
         local eth_type = eth:type()
-        print("Type is " .. tostring(eth_type))
         for key, _ in pairs(net_eths) do
             if key == eth_src and eth_type == 20 then
                 -- Get the net time the request took
-                print("Eth: " .. eth_src .. " (" .. net_eths[eth_src] .. ", " .. temp_time .. ")")
                 net_eths[eth_src] = temp_time - net_eths[eth_src]
             end
         end
