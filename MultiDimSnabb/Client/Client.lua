@@ -77,8 +77,8 @@ function Incubator:new(args)
                 eth = ether,
                 ip = ip,
                 udp = udp,
+		exp_ether = src_eth,
 		p = ret_gram:packet(),
-                dgram = datagram:new(),
 		access_time = access_time
         }
 
@@ -93,7 +93,13 @@ function Incubator:pull()
 	while not link.empty(i) do
 		local p = link.receive(i)
 		os.execute("sleep " .. self.access_time)
-		link.transmit(o, packet.clone(self.p))
+		local dgram = datagram:new(p, ethernet)
+		dgram:parse_n(3)
+		local eth, ip, udp = unpack(dgram:stack())
+		local eth_src = tostring(ethernet:ntop(eth:src()))
+		if (eth_src == self.exp_ether) then
+			link.transmit(o, packet.clone(self.p))
+		end
 	end
 end
 
