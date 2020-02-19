@@ -44,46 +44,10 @@ function Incubator:new(args)
 		main.exit(1)
 	end
 
-	--[[ TEMPORARY UNTIL IEEE 802.1Q IS FIXED ]]--
-	local ether = ethernet:new(
-        {
-                src = ethernet:pton(dst_eth),
-		dst = ethernet:pton(src_eth),
-                -- VLAN Ethernet Type
-                type = 0x8100
-        })
-
-	local ether2 = ethernet:new(
-        {
-                src = ethernet:pton(dst_eth),
-		dst = ethernet:pton(src_eth),
-                type = 0x0800
-        })
-
-        local ip = ipv4:new(
-        {
-                ihl = 0x4500,
-                dscp = 1,
-                ttl = 255,
-                protocol = 17
-        })
-
-        local udp = _udp:new(
-        {
-                src_port = 123,
-                dst_port = 456
-        })
-
-	local ret_gram = datagram:new()
-	ret_gram:push(udp)
-	ret_gram:push(ip)
-	ret_gram:push(ether2)
-	ret_gram:push(ether)
-
         local o =
         {
-		exp_ether = src_eth,
-		p = ret_gram:packet(),
+		exp_src_ether = src_eth,
+		exp_dst_ether = dst_eth,
 		access_time = access_time
         }
 
@@ -98,13 +62,20 @@ function Incubator:pull()
 	while not link.empty(i) do
 		local p = link.receive(i)
 		os.execute("sleep " .. self.access_time)
-		local dgram = datagram:new(p, ethernet)
+		local dgram = datagram:new(p, ethernet, ipv4, _udp)
 		dgram:parse_n(3)
 		local eth, _, _ = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
-		if (eth_src == self.exp_ether) then
-			print("Sending...")
-			link.transmit(o, packet.clone(self.p))
+		local eth_dst = tostring(ethernet:ntop(eth:dst()))
+		local eth_type = eth:type()
+		print("Sorc: ", eth_src)
+		print("Type: ", tostring(eth_type))
+		if eth_src == self.exp_src_ether and eth_dst == self.exp_dst_ether and eth_type == 20 then
+			print("Responding...")
+			local telegram = datagram:new()
+			eth:swap()
+			telegram:push(eth)
+			link.transmit(o, telegram:packet())
 		end
 	end
 end
