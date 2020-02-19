@@ -53,30 +53,39 @@ function Generator:new(args)
 	--[[ Packet Stuff ]]--
 	local src_eth = args["src_eth"]
 
-	local ether = ethernet:new(
+    local ether = ethernet:new(
+    {
+        src = ethernet:pton(src_eth),
+		-- VLAN Ethernet Type
+        type = 0x8100
+    })
+
+	local ether2 = ethernet:new(
 	{
 		src = ethernet:pton(src_eth),
-		-- VLAN Ethernet Type
-		type = 0x8100
+        type = 0x0800
 	})
 
 	local ip = ipv4:new(
 	{
 		ihl = 0x4500,
-		dscp = 1,
+        --src = ipv4:ntop("192.168.1.1"),
+        --dst = ipv4:ntop("192.168.1.4"),
+		--dscp = 1,
 		ttl = 255,
 		protocol = 17
 	})
 
 	local udp = _udp:new(
 	{
-		src_port = 123,
-		dst_port = 456
+		src_port = 7000,
+		dst_port = 7000
 	})
 
 	local o = 
 	{ 
 		eth = ether,
+        eth2 = ether2,
 		ip = ip,
 		udp = udp,
 		dgram = datagram:new(),
@@ -94,13 +103,19 @@ function Generator:gen_packet()
 	print("Pinging Node " .. tostring(self.cur_node) .. " | Addr: " .. ethernet:ntop(addr))
 
 	self.eth:dst(addr)
+    self.eth2:dst(addr)
 	self.dgram = datagram:new()
 	self.dgram:push(self.udp)
 	self.dgram:push(self.ip)
-	self.dgram:push(self.eth)
+	self.dgram:push(self.eth2)
+    self.dgram:push(self.eth)
 
 	net_eths[ethernet:ntop(addr)] = os.clock()
-	link.transmit(self.output.output, self.dgram:packet())
+    local p = self.dgram:packet()
+    if ethernet:ntop(addr) == "02:44:d9:f0:7a:cc" then
+        print("Sending packet:\n" .. lib.hexdump(ffi.string(p.data, p.length)))
+    end
+	link.transmit(self.output.output, p)
 	
 	if self.cur_node == self.num_nodes then
 		self.cur_node = 1
@@ -149,6 +164,9 @@ function Generator:push()
 
 		local eth, ip, _ = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
+        if eth_src == "02:a5:80:c7:b0:f4" then
+            print("Received packet:\n" .. lib.hexdump(ffi.string(p.data, p.length)))
+        end
         --local proto = ip:protocol()
         --print("Proto is " .. tostring(proto))
         

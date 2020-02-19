@@ -26,6 +26,8 @@ def main():
     session.execute("INSERT INTO main (key, value) VALUES ('test2', 'result2')")
     session.execute("INSERT INTO main (key, value) VALUES ('test3', 'result3')")
     session.execute("INSERT INTO main (key, value) VALUES ('test4', 'result4')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test5', 'result5')")
+    session.execute("INSERT INTO main (key, value) VALUES ('test6', 'result6')")
 
     return 0
 
