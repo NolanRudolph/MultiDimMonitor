@@ -102,7 +102,6 @@ function Incubator:pull()
 		dgram:parse_n(3)
 		local eth, _, _ = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
-		print("Got one...")
 		if (eth_src == self.exp_ether) then
 			print("Sending...")
 			link.transmit(o, packet.clone(self.p))
