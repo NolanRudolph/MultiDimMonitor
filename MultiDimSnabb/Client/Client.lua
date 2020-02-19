@@ -53,6 +53,13 @@ function Incubator:new(args)
                 type = 0x8100
         })
 
+	local ether2 = ethernet:new(
+        {
+                src = ethernet:pton(dst_eth),
+		dst = ethernet:pton(src_eth),
+                type = 0x0800
+        })
+
         local ip = ipv4:new(
         {
                 ihl = 0x4500,
@@ -70,13 +77,11 @@ function Incubator:new(args)
 	local ret_gram = datagram:new()
 	ret_gram:push(udp)
 	ret_gram:push(ip)
+	ret_gram:push(ether2)
 	ret_gram:push(ether)
 
         local o =
         {
-                eth = ether,
-                ip = ip,
-                udp = udp,
 		exp_ether = src_eth,
 		p = ret_gram:packet(),
 		access_time = access_time
@@ -95,9 +100,11 @@ function Incubator:pull()
 		os.execute("sleep " .. self.access_time)
 		local dgram = datagram:new(p, ethernet)
 		dgram:parse_n(3)
-		local eth, ip, udp = unpack(dgram:stack())
+		local eth, _, _ = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
+		print("Got one...")
 		if (eth_src == self.exp_ether) then
+			print("Sending...")
 			link.transmit(o, packet.clone(self.p))
 		end
 	end
