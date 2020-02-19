@@ -60,35 +60,29 @@ function Generator:new(args)
         type = 0x8100
     })
 
-	local ether2 = ethernet:new(
-	{
-		src = ethernet:pton(src_eth),
-        type = 0x0800
-	})
-
 	local ip = ipv4:new(
 	{
 		ihl = 0x4500,
-        --src = ipv4:ntop("192.168.1.1"),
-        --dst = ipv4:ntop("192.168.1.4"),
+        src = ipv4:ntop("192.168.1.1"),
+        dst = ipv4:ntop("192.168.1.4"),
 		--dscp = 1,
 		ttl = 255,
-		protocol = 17
+		--protocol = 17
 	})
 
+--[[
 	local udp = _udp:new(
 	{
 		src_port = 7000,
 		dst_port = 7000
 	})
+--]]
 
 	local o = 
 	{ 
 		eth = ether,
-        eth2 = ether2,
 		ip = ip,
-		udp = udp,
-		dgram = datagram:new(),
+		--udp = udp,
 		nodes = dst_eths,
 		num_nodes = num_nodes,
 		cur_node = 1,
@@ -103,18 +97,14 @@ function Generator:gen_packet()
 	print("Pinging Node " .. tostring(self.cur_node) .. " | Addr: " .. ethernet:ntop(addr))
 
 	self.eth:dst(addr)
-    self.eth2:dst(addr)
-	self.dgram = datagram:new()
-	self.dgram:push(self.udp)
-	self.dgram:push(self.ip)
-	self.dgram:push(self.eth2)
-    self.dgram:push(self.eth)
+    local dgram = datagram:new()
+	--self.dgram:push(self.udp)
+	dgram:push(self.ip)
+    dgram:push(self.eth)
 
+    local p = dgram:packet()
+    -- Start timer right before transmitting packet
 	net_eths[ethernet:ntop(addr)] = os.clock()
-    local p = self.dgram:packet()
-    if ethernet:ntop(addr) == "02:44:d9:f0:7a:cc" then
-        print("Sending packet:\n" .. lib.hexdump(ffi.string(p.data, p.length)))
-    end
 	link.transmit(self.output.output, p)
 	
 	if self.cur_node == self.num_nodes then
@@ -139,7 +129,11 @@ function Generator:pull()
 				best_i = i
 				best = t
 			end	
-			print("Replica" .. i .. " : " .. t)
+            if t > 1 then
+                print("Replica" .. i .. " : OFFLINE")
+            else
+                print("Replica" .. i .. " : " .. t)
+            end
 		end
 		print("----------------------")
 		print("BEST NODE: Replica" .. best_i)
@@ -160,25 +154,19 @@ function Generator:push()
 		local p = link.receive(i)
 
 		local dgram = datagram:new(p, ethernet)
-		dgram:parse_n(3)
+		dgram:parse_n(1)
 
-		local eth, ip, _ = unpack(dgram:stack())
+		local eth = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
-        if eth_src == "02:a5:80:c7:b0:f4" then
-            print("Received packet:\n" .. lib.hexdump(ffi.string(p.data, p.length)))
-        end
-        --local proto = ip:protocol()
-        --print("Proto is " .. tostring(proto))
-        
-        --for key, _ in pairs(net_eths) do
-        --    if key == eth_src then
+        local eth_type = eth:type()
+        print("Type is " .. tostring(eth_type))
+        for key, _ in pairs(net_eths) do
+            if key == eth_src and eth_type == 20 then
                 -- Get the net time the request took
-        --        print("Eth: " .. eth_src .. " (" .. net_eths[eth_src] .. ", " .. temp_time .. ")")
-        if net_eths[eth_src] then
-            net_eths[eth_src] = temp_time - net_eths[eth_src]
+                print("Eth: " .. eth_src .. " (" .. net_eths[eth_src] .. ", " .. temp_time .. ")")
+                net_eths[eth_src] = temp_time - net_eths[eth_src]
+            end
         end
-        --    end
-        --end
 
 		packet.free(p)
 	end
