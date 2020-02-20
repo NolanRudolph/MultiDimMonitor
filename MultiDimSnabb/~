@@ -193,7 +193,7 @@ function Generator:push()
             local dgram = datagram:new(p, ethernet)
             dgram:parse_n(3)
             local payload, length = dgram:payload()
-            payload = ffi.string(payload)
+            local payload = ffi.string(payload)
 
             local eth = unpack(dgram:stack())
             local ret_val = ""
@@ -209,20 +209,21 @@ function Generator:push()
 
                 -- Request Cassandra to retrieve value (to "ret_val.txt")
                 val = os.execute("python ~/MultiDimMonitor/Cassandra/req_key.py")
+                print("val is: " .. val)
 
                 -- Retrieve the value
-                local f = io.open("ret_val.txt")
-                ret_val = f:read()
-                f:close()
-
-                -- Return this value to the Client
-                local retgram = datagram:new()
-                retgram:push(self.udp)
-                retgram:push(self.ip)
-                retgram:push(self.ret_cli_eth)
-                retgram:payload("val" .. ret_val, 3 + string.len(ret_val))
-                link.transmit(self.output.output, retgram:packet())
+                --local f = io.open("../Cassandra/req_val.txt")
+                --ret_val = f:read()
+                --f:close()
             end
+
+            -- Return this value to the Client
+            local retgram = datagram:new()
+            retgram:push(self.ret_cli_eth)
+            retgram:push(self.ip)
+            retgram:push(self.udp)
+            retgram:payload(ret_val, string.len(ret_val))
+            link.transmit(self.output.output, retgram:packet())
         end
 
 	packet.free(p)
