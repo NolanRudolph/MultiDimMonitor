@@ -123,8 +123,8 @@ function Generator:pull()
 	if self.wait == 400000 then
 		self.wait = 0
         best_eth = nil
-        -- Lua's "Infinity"
-		best = 1e309
+        -- We expect a latency less than 1000ms
+		best = 1
 		i = 0
 		print("------- TIMES --------")
 		for eth, dt in pairs(net_eths) do
@@ -140,7 +140,7 @@ function Generator:pull()
             end
 		end
 		print("----------------------")
-        if best_eth == nil then
+        if best == 1 then
             print("BEST NODE: N/A")
         else
             print("BEST NODE: " .. cor_rep[best_eth])
