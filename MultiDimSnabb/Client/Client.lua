@@ -25,8 +25,9 @@ local C = ffi.c
 Requester = {}
 
 function Requester:new(args)
-	local src_eth = args["src_eth"]
+    local src_eth = args["src_eth"]
     local dst_eth = args["dst_eth"]
+    local key_req = args["key_req"]
 
     local ether = ethernet:new(
     {
@@ -36,34 +37,34 @@ function Requester:new(args)
         type = 0x0800
     })
 
-	local ip = ipv4:new(
-	{
-		ihl = 0x4500,
+    local ip = ipv4:new(
+    {
+        ihl = 0x4500,
         src = ipv4:ntop("192.168.1.0"),
         dst = ipv4:ntop("192.168.1.1"),
-		ttl = 255,
-		protocol = 17
-	})
+	ttl = 255,
+	protocol = 17
+    })
 
-	local udp = _udp:new(
-	{
-		src_port = 7000,
-		dst_port = 7000
-	})
+    local udp = _udp:new(
+    {
+        src_port = 7000,
+        dst_port = 7000
+    })
 
     local dgram = datagram:new()
     dgram:push(udp)
     dgram:push(ip)
     dgram:push(ether)
 
-	local o = 
-	{ 
+    local o =
+    { 
         exp_eth_src = dst_eth,
         exp_eth_dst = src_eth,
-		p = dgram:packet()
-	}
+        p = dgram:packet()
+    }
 
-	return setmetatable(o, {__index = Requester})
+    return setmetatable(o, {__index = Requester})
 end
 
 function Requester:pull()
@@ -93,12 +94,12 @@ function Requester:push()
 end
 
 function show_usage(code)
-	print(require("program.MultiDimSnabb.Server.README_inc"))
+	print(require("program.MultiDimSnabb.Client.README_inc"))
 	main.exit(code)
 end
 
 function run(args)
-	if #args ~= 3 then 
+	if #args ~= 4 then 
         show_usage(1) 
     end
 
@@ -107,11 +108,13 @@ function run(args)
 	local IF       = args[1]
 	local src_eth  = args[2]
 	local dst_eth  = args[3]
+	local key      = args[4]
 
 	config.app(c, "requester", Requester, 
 	{
 		src_eth = src_eth,
-		dst_eth = dst_eth
+		dst_eth = dst_eth,
+		req_key = key
 	})
 
 	local RawSocket = raw_sock.RawSocket
