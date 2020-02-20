@@ -25,8 +25,13 @@ local C = ffi.c
 -- Temp req
 local raw_sock = require("apps.socket.raw")
 
-net_eths = {}
-
+-- Used for calculating latency
+net_eths  = {}
+-- Stands for "Corresponding Ips", gives a IP to each MAC
+cor_ip    = {}
+-- Stands for "Corresponding Replica", gives replica # for each MAC
+cor_rep   = {}
+-- Snabb must instantiate an object preemptively for links
 Generator = {}
 
 function Generator:new(args)
@@ -48,6 +53,8 @@ function Generator:new(args)
 		local rec = io.read()
 		table.insert(dst_eths, ethernet:pton(rec))
 		net_eths[rec] = 0
+        cor_ip[rec] = "192.168.1." .. tostring(i + 1)
+        cor_rep[rec] = "Replica " .. tostring(i)
 	end
 
 	--[[ Packet Stuff ]]--
@@ -64,7 +71,6 @@ function Generator:new(args)
 	{
 		ihl = 0x4500,
         src = ipv4:ntop("192.168.1.1"),
-        dst = ipv4:ntop("192.168.1.4"),
 		--dscp = 1,
 		ttl = 255,
 		protocol = 17
@@ -92,9 +98,8 @@ end
 
 function Generator:gen_packet()
 	local addr = self.nodes[self.cur_node]
-	print("Pinging Node " .. tostring(self.cur_node) .. " | Addr: " .. ethernet:ntop(addr))
-
 	self.eth:dst(addr)
+
     local dgram = datagram:new()
 	dgram:push(self.udp)
 	dgram:push(self.ip)
@@ -117,24 +122,33 @@ end
 function Generator:pull()
 	if self.wait == 400000 then
 		self.wait = 0
+        best_eth = nil
+        -- Lua's "Infinity"
+		best = 1e309
 		i = 0
-		best_i = 0
-		best = 100
-		print("\n------- TIMES --------")
-		for _, t in pairs(net_eths) do
+		print("------- TIMES --------")
+		for eth, dt in pairs(net_eths) do
 			i = i + 1
-			if t < best then
-				best_i = i
-				best = t
+			if dt < best then
+				best_eth = eth
+				best = dt
 			end	
-            if t > 1 then
-                print("Replica" .. i .. " : OFFLINE")
+            if dt > 1 then
+                print(cor_rep[eth] .. ": OFFLINE")
             else
-                print("Replica" .. i .. " : " .. t)
+                print(cor_rep[eth] .. ": " .. tostring(dt))
             end
 		end
 		print("----------------------")
-		print("BEST NODE: Replica" .. best_i)
+        if best_eth == nil then
+            print("BEST NODE: N/A")
+        else
+            print("BEST NODE: " .. cor_rep[best_eth])
+            print("Writing " .. cor_ip[best_eth] .. " to file.")
+            f = io.open("best_node.txt", "w+")
+            f:write(cor_ip[best_eth] .. '\n')
+            io.close(f)
+        end
 		print("----------------------\n")
 	elseif self.wait % 100000 == 0 then
 		self.wait = self.wait + 1
