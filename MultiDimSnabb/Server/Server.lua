@@ -25,8 +25,13 @@ local C = ffi.c
 -- Temp req
 local raw_sock = require("apps.socket.raw")
 
-net_eths = {}
-
+-- Used for calculating latency
+net_eths  = {}
+-- Stands for "Corresponding Ips", gives a IP to each MAC
+cor_ip    = {}
+-- Stands for "Corresponding Replica", gives replica # for each MAC
+cor_rep   = {}
+-- Snabb must instantiate an object preemptively for links
 Generator = {}
 
 function Generator:new(args)
@@ -48,6 +53,8 @@ function Generator:new(args)
 		local rec = io.read()
 		table.insert(dst_eths, ethernet:pton(rec))
 		net_eths[rec] = 0
+        cor_ip[rec] = "192.168.1." .. tostring(i + 1)
+        cor_rep[rec] = "Replica " .. tostring(i)
 	end
 
 	--[[ Packet Stuff ]]--
@@ -64,25 +71,22 @@ function Generator:new(args)
 	{
 		ihl = 0x4500,
         src = ipv4:ntop("192.168.1.1"),
-        dst = ipv4:ntop("192.168.1.4"),
 		--dscp = 1,
 		ttl = 255,
-		--protocol = 17
+		protocol = 17
 	})
 
---[[
 	local udp = _udp:new(
 	{
 		src_port = 7000,
 		dst_port = 7000
 	})
---]]
 
 	local o = 
 	{ 
 		eth = ether,
 		ip = ip,
-		--udp = udp,
+		udp = udp,
 		nodes = dst_eths,
 		num_nodes = num_nodes,
 		cur_node = 1,
@@ -94,11 +98,10 @@ end
 
 function Generator:gen_packet()
 	local addr = self.nodes[self.cur_node]
-	print("Pinging Node " .. tostring(self.cur_node) .. " | Addr: " .. ethernet:ntop(addr))
-
 	self.eth:dst(addr)
+
     local dgram = datagram:new()
-	--self.dgram:push(self.udp)
+	dgram:push(self.udp)
 	dgram:push(self.ip)
     dgram:push(self.eth)
 
@@ -119,24 +122,33 @@ end
 function Generator:pull()
 	if self.wait == 400000 then
 		self.wait = 0
+        best_eth = nil
+        -- We expect a latency less than 1000ms
+		best = 1
 		i = 0
-		best_i = 0
-		best = 100
-		print("\n------- TIMES --------")
-		for _, t in pairs(net_eths) do
+		print("------- TIMES --------")
+		for eth, dt in pairs(net_eths) do
 			i = i + 1
-			if t < best then
-				best_i = i
-				best = t
+			if dt < best then
+				best_eth = eth
+				best = dt
 			end	
-            if t > 1 then
-                print("Replica" .. i .. " : OFFLINE")
+            if dt > 1 then
+                print(cor_rep[eth] .. ": OFFLINE")
             else
-                print("Replica" .. i .. " : " .. t)
+                print(cor_rep[eth] .. ": " .. tostring(dt))
             end
 		end
 		print("----------------------")
-		print("BEST NODE: Replica" .. best_i)
+        if best == 1 then
+            print("BEST NODE: N/A")
+        else
+            print("BEST NODE: " .. cor_rep[best_eth])
+            print("Writing " .. cor_ip[best_eth] .. " to file.")
+            f = io.open("best_node.txt", "w+")
+            f:write(cor_ip[best_eth] .. '\n')
+            io.close(f)
+        end
 		print("----------------------\n")
 	elseif self.wait % 100000 == 0 then
 		self.wait = self.wait + 1
@@ -159,11 +171,9 @@ function Generator:push()
 		local eth = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
         local eth_type = eth:type()
-        print("Type is " .. tostring(eth_type))
         for key, _ in pairs(net_eths) do
             if key == eth_src and eth_type == 20 then
                 -- Get the net time the request took
-                print("Eth: " .. eth_src .. " (" .. net_eths[eth_src] .. ", " .. temp_time .. ")")
                 net_eths[eth_src] = temp_time - net_eths[eth_src]
             end
         end

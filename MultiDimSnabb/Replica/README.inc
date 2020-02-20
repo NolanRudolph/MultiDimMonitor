@@ -1,4 +1,4 @@
-Usage: MultiDimSnabb Client <Src> <Dst> <IF> <DT>
+Usage: MultiDimSnabb Replica <Src> <Dst> <IF> <DT>
 
   Src: Source MAC Address
   Dst: Destination MAC Address
@@ -6,4 +6,4 @@ Usage: MultiDimSnabb Client <Src> <Dst> <IF> <DT>
   DT : Disk Type (Options: SSD, HDD)
 
 Example:
-  ./snabb MultiDimSnabb Client 00:01:02:03:04:05 00:06:07:08:09 eth0 HDD
+  ./snabb MultiDimSnabb Replica 00:01:02:03:04:05 00:06:07:08:09 eth0 HDD

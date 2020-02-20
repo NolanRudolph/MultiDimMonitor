@@ -79,7 +79,7 @@ function Incubator:pull()
 end
 
 function show_usage(code)
-	print(require("program.MultiDimSnabb.Client.README_inc"))
+	print(require("program.MultiDimSnabb.Replica.README_inc"))
 	main.exit(code)
 end
 
