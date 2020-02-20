@@ -64,8 +64,6 @@ function Incubator:pull()
 		local eth_src = tostring(ethernet:ntop(eth:src()))
 		local eth_dst = tostring(ethernet:ntop(eth:dst()))
 		local eth_type = eth:type()
-		print("Sorc: ", eth_src)
-		print("Type: ", tostring(eth_type))
 		if eth_src == self.exp_src_ether and eth_dst == self.exp_dst_ether and eth_type == 20 then
 			print("Responding...")
 			local telegram = datagram:new()
