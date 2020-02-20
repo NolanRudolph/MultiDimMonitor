@@ -5,7 +5,7 @@
 
 # Include Apache Cassandra as a aprt of source list
 # COMMENT ME OUT IF NOT DEBIAN -- Instad follow http://cassandra.apache.org/download/
-echo "deb http://www.apache.org/dist/cassandra/debian 39x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
+echo "deb http://www.apache.org/dist/cassandra/debian 311x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
 
 # Install wget if not already installed
 if [ -z $(which wget) ]
