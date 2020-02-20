@@ -5,15 +5,22 @@
 
 # Include Apache Cassandra as a aprt of source list
 # COMMENT ME OUT IF NOT DEBIAN -- Instad follow http://cassandra.apache.org/download/
-echo "deb http://www.apache.org/dist/cassandra/debian 311x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
+echo "deb http://www.apache.org/dist/cassandra/debian 39x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
+
+# Install wget if not already installed
+if [ -z $(which wget) ]
+then
+	echo "Installing wget...";
+	sudo apt-get install -y wget > /dev/null;
+fi
 
 # Add key
 echo "Adding Apache Cassandra to known keys via curl..."
 echo "IF THIS TAKES MORE THAN TEN SECONDS, RESTART THIS SCRIPT"
-curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
+wget --no-check-certificate -qO - https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -;
 
 # Update system to not ruin user's computer
-sudo apt update;
+sudo apt update > /dev/null;
 
 # Install cassandra if not already installed
 if [ -z $(which cassandra) ]
