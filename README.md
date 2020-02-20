@@ -20,7 +20,7 @@ For client nodes looking to request keys from the server(s), make sure to run ``
 **Server**  
 For server nodes looking to receive key requests from client(s), make sure to run ```~/snabb/src/snabb MultiDimSnabb Server --help``` for more information.
 
-**Replica**
+**Replica**  
 For replica nodes looking to synchronize databases with one another, test best latency with respect to the server, and accept key requests and value returns, make sure to run ```~/snabb/src/snabb MultiDimSnabb Replica --help``` for more information.
   
 **Model**
