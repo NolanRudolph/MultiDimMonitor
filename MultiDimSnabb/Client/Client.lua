@@ -89,13 +89,20 @@ function Requester:push()
         local p = link.receive(i)
 
         local dgram = datagram:new(p, ethernet)
-        dgram:parse_n(1)
+        dgram:parse_n(3)
 
+        -- Get Payload
+        local payload, _ = dgram:payload()
+        payload = ffi.string(payload)
+        local sig = string.sub(payload, 1, 3)
+
+        -- Get Ethernet Source
         local eth = unpack(dgram:stack())
         local eth_src = tostring(ethernet:ntop(eth:src()))
         local eth_dst = tostring(ethernet:ntop(eth:dst()))
-        if eth_src == self.exp_eth_src and eth_dst == self.exp_eth_dst then
+        if eth_src == self.exp_eth_src and eth_dst == self.exp_eth_dst and sig == "val" then
             print("Received packet")
+            print("Value is " .. string.sub(payload, 4, -1))
         end
     end
 end
