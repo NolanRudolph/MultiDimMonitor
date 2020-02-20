@@ -31,30 +31,30 @@ cor_rep   = {}
 Generator = {}
 
 function Generator:new(args)
-	--[[ Node Stuff ]]--
-	dst_file = args["dst_file"]
-	local f = io.open(dst_file, "r")
-	io.input(f)
+    --[[ Node Stuff ]]--
+    dst_file = args["dst_file"]
+    local f = io.open(dst_file, "r")
+    io.input(f)
 
-	-- Check to see if file exists
-	if f == nil then
-		print("File does not exist.")
-		main.exit(1)
-	end
+    -- Check to see if file exists
+    if f == nil then
+        print("File does not exist.")
+        main.exit(1)
+    end
 
-	local num_nodes = tonumber(io.read())
+    local num_nodes = tonumber(io.read())
 
-	local dst_eths = {}
-	for i = 1, num_nodes do
-		local rec = io.read()
-		table.insert(dst_eths, ethernet:pton(rec))
-		net_eths[rec] = 0
+    local dst_eths = {}
+    for i = 1, num_nodes do
+        local rec = io.read()
+        table.insert(dst_eths, ethernet:pton(rec))
+        net_eths[rec] = 0
         cor_ip[rec] = "192.168.1." .. tostring(i + 1)
         cor_rep[rec] = "Replica " .. tostring(i)
-	end
+    end
 
-	--[[ Packet Stuff ]]--
-	local src_eth = args["src_eth"]
+    --[[ Packet Stuff ]]--
+    local src_eth = args["src_eth"]
     local cli_eth = args["cli_eth"]
 
     local ether = ethernet:new(
@@ -64,34 +64,34 @@ function Generator:new(args)
         type = 0x8100
     })
 
-	local ip = ipv4:new(
-	{
-		ihl = 0x4500,
+    local ip = ipv4:new(
+    {
+        ihl = 0x4500,
         src = ipv4:ntop("192.168.1.1"),
-		--dscp = 1,
-		ttl = 255,
-		protocol = 17
-	})
+        --dscp = 1,
+	ttl = 255,
+	protocol = 17
+    })
 
-	local udp = _udp:new(
-	{
-		src_port = 7000,
-		dst_port = 7000
-	})
+    local udp = _udp:new(
+    {
+	src_port = 7000,
+	dst_port = 7000
+    })
 
-	local o = 
-	{ 
-		eth = ether,
-		ip = ip,
-		udp = udp,
+    local o =
+    { 
+	eth = ether,
+	ip = ip,
+	udp = udp,
         cli_eth = cli_eth,
-		nodes = dst_eths,
-		num_nodes = num_nodes,
-		cur_node = 1,
-		wait = 0
-	}
+	nodes = dst_eths,
+	num_nodes = num_nodes,
+	cur_node = 1,
+	wait = 0
+    }
 
-	return setmetatable(o, {__index = Generator})
+    return setmetatable(o, {__index = Generator})
 end
 
 function Generator:gen_packet()
