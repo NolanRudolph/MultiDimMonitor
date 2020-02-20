@@ -8,9 +8,13 @@ local function show_usage(exit_code)
 end
 
 function run(args)
-	if #args == 0 then show_usage(1) end
-	local node_type = table.remove(args, 1)
+	if #args == 0 then 
+        show_usage(1) 
+    end
+	
+    local node_type = table.remove(args, 1)
 	local modname = ("program.MultiDimSnabb.%s.%s"):format(node_type, node_type)
+
 	if not lib.have_module(modname) then
 		show_usage(1)
 	end

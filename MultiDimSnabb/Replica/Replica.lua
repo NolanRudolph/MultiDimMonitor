@@ -20,13 +20,9 @@ local _udp       = require("lib.protocol.udp")
 local ffi = require("ffi")
 local C = ffi.c
 
--- Temp req
-local raw_sock = require("apps.socket.raw")
 
-
+-- Snabb must instantiate an object preemptively for links
 Incubator = {}
-
-dataset = {}
 
 function Incubator:new(args)
 	local src_eth = args["src_eth"]
@@ -44,12 +40,12 @@ function Incubator:new(args)
 		main.exit(1)
 	end
 
-        local o =
-        {
-		exp_src_ether = src_eth,
-		exp_dst_ether = dst_eth,
-		access_time = access_time
-        }
+    local o =
+    {
+        exp_src_ether = src_eth,
+        exp_dst_ether = dst_eth,
+        access_time = access_time
+    }
 
 	return setmetatable(o, {__index = Incubator})
 end

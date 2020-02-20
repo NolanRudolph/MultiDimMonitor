@@ -7,8 +7,6 @@ local lib        = require("core.lib")
 -- App association requirements
 local app        = require("core.app")
 local link       = require("core.link")
-local Intel82599 = require("apps.intel_mp.intel_mp").Intel82599
-local LoadGen    = require("apps.intel_mp.loadgen").LoadGen
 local raw_sock   = require("apps.socket.raw")
 
 -- Packet creation requirements
@@ -22,8 +20,6 @@ local _udp       = require("lib.protocol.udp")
 local ffi = require("ffi")
 local C = ffi.c
 
--- Temp req
-local raw_sock = require("apps.socket.raw")
 
 -- Used for calculating latency
 net_eths  = {}
@@ -59,6 +55,7 @@ function Generator:new(args)
 
 	--[[ Packet Stuff ]]--
 	local src_eth = args["src_eth"]
+    local cli_eth = args["cli_eth"]
 
     local ether = ethernet:new(
     {
@@ -87,6 +84,7 @@ function Generator:new(args)
 		eth = ether,
 		ip = ip,
 		udp = udp,
+        cli_eth = cli_eth,
 		nodes = dst_eths,
 		num_nodes = num_nodes,
 		cur_node = 1,
@@ -171,11 +169,23 @@ function Generator:push()
 		local eth = unpack(dgram:stack())
 		local eth_src = tostring(ethernet:ntop(eth:src()))
         local eth_type = eth:type()
+        -- Check for latency responses
         for key, _ in pairs(net_eths) do
             if key == eth_src and eth_type == 20 then
                 -- Get the net time the request took
                 net_eths[eth_src] = temp_time - net_eths[eth_src]
             end
+        end
+
+        -- Check for client requests
+        if eth_src == self.cli_eth then
+            -- Temp
+            local retgram = datagram:new()
+            self.eth:dst(ethernet:pton(self.cli_eth))
+            retgram:push(self.eth)
+            retgram:push(self.ip)
+            retgram:push(self.udp)
+            link.transmit(self.output.output, retgram:packet())
         end
 
 		packet.free(p)
@@ -188,17 +198,18 @@ function show_usage(code)
 end
 
 function run(args)
-	x = os.clock()
 	if #args ~= 3 then show_usage(1) end
 	local c = config.new()
 
 	local IF       = args[1]
 	local src_eth  = args[2]
-	local dst_file = args[3]
+    local cli_eth  = args[3]
+	local dst_file = args[4]
 
 	config.app(c, "generator", Generator, 
 	{
 		src_eth = src_eth,
+        cli_eth = cli_eth,
 		dst_file = dst_file
 	})
 
