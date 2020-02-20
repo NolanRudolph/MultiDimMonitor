@@ -21,13 +21,16 @@ local ffi = require("ffi")
 local C = ffi.c
 
 
+-- This is used to determine if our program has finished
+req_complete = false
+
 -- Snabb must instantiate an object preemptively for links
 Requester = {}
 
 function Requester:new(args)
     local src_eth = args["src_eth"]
     local dst_eth = args["dst_eth"]
-    local key_req = args["key_req"]
+    local req_key = args["req_key"]
 
     local ether = ethernet:new(
     {
@@ -42,8 +45,8 @@ function Requester:new(args)
         ihl = 0x4500,
         src = ipv4:ntop("192.168.1.0"),
         dst = ipv4:ntop("192.168.1.1"),
-	ttl = 255,
-	protocol = 17
+        ttl = 255,
+        protocol = 17
     })
 
     local udp = _udp:new(
@@ -56,6 +59,9 @@ function Requester:new(args)
     dgram:push(udp)
     dgram:push(ip)
     dgram:push(ether)
+    -- Include message to server
+    payload = "key" .. req_key
+    dgram:payload(payload, 3 + string.len(req_key))
 
     local o =
     { 
@@ -69,20 +75,21 @@ end
 
 function Requester:pull()
     assert(self.output.output, "Could not locate output port.")
+    print("Sending packet...")
     link.transmit(self.output.output, packet.clone(self.p))
-    os.execute("sleep 5")
+    os.execute("sleep 2")
 end
 
 function Requester:push()
     assert(self.output.output, "Could not locate output port.")
     assert(self.input.input, "Could not locate input port.")
     local i = self.input.input
-    local o = self.outpuit.output
+    local o = self.output.output
     while not link.empty(i) do
         local p = link.receive(i)
 
         local dgram = datagram:new(p, ethernet)
-        dgram:parse_n(3)
+        dgram:parse_n(1)
 
         local eth = unpack(dgram:stack())
         local eth_src = tostring(ethernet:ntop(eth:src()))
@@ -90,6 +97,18 @@ function Requester:push()
         if eth_src == self.exp_eth_src and eth_dst == self.exp_eth_dst then
             print("Received packet")
         end
+    end
+end
+
+temp_time = os.clock()
+
+function is_done()
+    if req_complete then
+        return true
+    elseif os.clock() - temp_time > 10 then
+        return false
+    else
+        return false
     end
 end
 
@@ -112,9 +131,9 @@ function run(args)
 
     config.app(c, "requester", Requester, 
     {
-	src_eth = src_eth,
-	dst_eth = dst_eth,
-	req_key = key
+        src_eth = src_eth,
+        dst_eth = dst_eth,
+        req_key = key
     })
 
     local RawSocket = raw_sock.RawSocket
@@ -125,7 +144,7 @@ function run(args)
 
     engine.busywait = true
     engine.configure(c)
-    engine.main({duration = 100})
+    engine.main({duration = 10})
 
-    print("Completed 100s.")
+    print("Completed 10s.")
 end
