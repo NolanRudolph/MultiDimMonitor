@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Setup for Cassandra in Multi-Dimensional Monitor
 
 from cassandra.cluster import Cluster
@@ -28,6 +29,7 @@ def main():
     session.execute("INSERT INTO main (key, value) VALUES ('test4', 'result4')")
     session.execute("INSERT INTO main (key, value) VALUES ('test5', 'result5')")
     session.execute("INSERT INTO main (key, value) VALUES ('test6', 'result6')")
+    session.execute("INSERT INTO main (key, value) VALUES ('hello', 'world')")
 
     return 0
 

@@ -64,6 +64,13 @@ function Generator:new(args)
         type = 0x8100
     })
 
+    local ret_cli_ether = ethernet:new(
+    {
+        src = ethernet:pton(src_eth),
+        dst = ethernet:pton(cli_eth),
+        type = 0x0800
+    })
+
     local ip = ipv4:new(
     {
         ihl = 0x4500,
@@ -82,9 +89,10 @@ function Generator:new(args)
     local o =
     { 
 	eth = ether,
+    exp_cli_eth = cli_eth,
+    ret_cli_eth = ret_cli_ether,
 	ip = ip,
 	udp = udp,
-        cli_eth = cli_eth,
 	nodes = dst_eths,
 	num_nodes = num_nodes,
 	cur_node = 1,
@@ -145,7 +153,7 @@ function Generator:pull()
         else
             print("BEST NODE: " .. cor_rep[best_eth])
             print("Writing " .. cor_ip[best_eth] .. " to file.")
-            f = io.open("best_node.txt", "w+")
+            f = io.open("../Cassandra/best_node.txt", "w+")
             f:write(cor_ip[best_eth] .. '\n')
             io.close(f)
         end
@@ -181,13 +189,39 @@ function Generator:push()
         end
 
         -- Check for client requests
-        if eth_src == self.cli_eth then
-            -- Temp
+        if eth_src == self.exp_cli_eth then
+            local dgram = datagram:new(p, ethernet)
+            dgram:parse_n(3)
+            local payload, length = dgram:payload()
+            local payload = ffi.string(payload)
+
+            local eth = unpack(dgram:stack())
+            local ret_val = ""
+
+            if string.sub(payload, 1, 3) == "key" then
+                local key = string.sub(payload, 4, -1)
+                print("Got request for key: " .. key)
+
+                -- Write key to file "req_key.txt" for Cassandra to use
+                f = io.open("req_key.txt", "w+")
+                f:write(key .. '\n')
+                f:close()
+
+                -- Request Cassandra to retrieve value (to "ret_val.txt")
+                os.execute("python ~/MultiDimMonitor/Cassandra/req_key.py")
+
+                -- Retrieve the value
+                f = io.open("req_val.txt")
+                ret_val = f:read()
+                f:close()
+            end
+
+            -- Return this value to the Client
             local retgram = datagram:new()
-            self.eth:dst(ethernet:pton(self.cli_eth))
-            retgram:push(self.eth)
+            retgram:push(self.ret_cli_eth)
             retgram:push(self.ip)
             retgram:push(self.udp)
+            retgram:payload(ret_val, string.len(ret_val))
             link.transmit(self.output.output, retgram:packet())
         end
 
@@ -202,7 +236,7 @@ function show_usage(code)
 end
 
 function run(args)
-    if #args ~= 3 then show_usage(1) end
+    if #args ~= 4 then show_usage(1) end
     local c = config.new()
 
     local IF       = args[1]
