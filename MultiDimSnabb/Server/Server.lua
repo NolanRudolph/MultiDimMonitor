@@ -95,49 +95,51 @@ function Generator:new(args)
 end
 
 function Generator:gen_packet()
-	local addr = self.nodes[self.cur_node]
-	self.eth:dst(addr)
+    local addr = self.nodes[self.cur_node]
+    self.eth:dst(addr)
 
     local dgram = datagram:new()
-	dgram:push(self.udp)
-	dgram:push(self.ip)
+    dgram:push(self.udp)
+    dgram:push(self.ip)
     dgram:push(self.eth)
 
     local p = dgram:packet()
     -- Start timer right before transmitting packet
-	net_eths[ethernet:ntop(addr)] = os.clock()
-	link.transmit(self.output.output, p)
-	
-	if self.cur_node == self.num_nodes then
-		self.cur_node = 1
-	else
-		self.cur_node = self.cur_node + 1
-	end
-	
-	return
+    net_eths[ethernet:ntop(addr)] = os.clock()
+    link.transmit(self.output.output, p)
+
+    if self.cur_node == self.num_nodes then
+	self.cur_node = 1
+    else
+	self.cur_node = self.cur_node + 1
+    end
+
+    return
 end
 
 function Generator:pull()
-	if self.wait == 400000 then
-		self.wait = 0
+    if self.wait == 400000 then
+	self.wait = 0
         best_eth = nil
         -- We expect a latency less than 1000ms
-		best = 1
-		i = 0
-		print("------- TIMES --------")
-		for eth, dt in pairs(net_eths) do
-			i = i + 1
-			if dt < best then
-				best_eth = eth
-				best = dt
-			end	
-            if dt > 1 then
-                print(cor_rep[eth] .. ": OFFLINE")
-            else
+	best = 1
+	i = 0
+	print("------- TIMES --------")
+	for eth, dt in pairs(net_eths) do
+	    i = i + 1
+	    if dt < best then
+	        best_eth = eth
+		best = dt
+	    end	
+	    if dt > 1 then
+	        print(cor_rep[eth] .. ": OFFLINE")
+    	    else
                 print(cor_rep[eth] .. ": " .. tostring(dt))
             end
-		end
-		print("----------------------")
+	end
+
+	-- Terminal inform and write to file for Cassandra
+	print("----------------------")
         if best == 1 then
             print("BEST NODE: N/A")
         else
@@ -157,17 +159,18 @@ function Generator:pull()
 end
 
 function Generator:push()
-	assert(self.input.input, "Could not locate input port.")
-	local i = self.input.input
-	while not link.empty(i) do
-		local temp_time = os.clock()
-		local p = link.receive(i)
+    assert(self.input.input, "Could not locate input port.")
+    local i = self.input.input
 
-		local dgram = datagram:new(p, ethernet)
-		dgram:parse_n(1)
+    while not link.empty(i) do
+	local temp_time = os.clock()
+	local p = link.receive(i)
 
-		local eth = unpack(dgram:stack())
-		local eth_src = tostring(ethernet:ntop(eth:src()))
+	local dgram = datagram:new(p, ethernet)
+	dgram:parse_n(1)
+
+	local eth = unpack(dgram:stack())
+	local eth_src = tostring(ethernet:ntop(eth:src()))
         local eth_type = eth:type()
         -- Check for latency responses
         for key, _ in pairs(net_eths) do
@@ -188,8 +191,9 @@ function Generator:push()
             link.transmit(self.output.output, retgram:packet())
         end
 
-		packet.free(p)
-	end
+	packet.free(p)
+
+    end
 end
 
 function show_usage(code)
@@ -198,30 +202,30 @@ function show_usage(code)
 end
 
 function run(args)
-	if #args ~= 3 then show_usage(1) end
-	local c = config.new()
+    if #args ~= 3 then show_usage(1) end
+    local c = config.new()
 
-	local IF       = args[1]
-	local src_eth  = args[2]
+    local IF       = args[1]
+    local src_eth  = args[2]
     local cli_eth  = args[3]
-	local dst_file = args[4]
+    local dst_file = args[4]
 
-	config.app(c, "generator", Generator, 
-	{
-		src_eth = src_eth,
+    config.app(c, "generator", Generator, 
+    {
+	src_eth = src_eth,
         cli_eth = cli_eth,
-		dst_file = dst_file
-	})
+	dst_file = dst_file
+    })
 
-	local RawSocket = raw_sock.RawSocket
-	config.app(c, "server", RawSocket, IF)
+    local RawSocket = raw_sock.RawSocket
+    config.app(c, "server", RawSocket, IF)
 
-	config.link(c, "generator.output -> server.rx")
-	config.link(c, "server.tx -> generator.input")
+    config.link(c, "generator.output -> server.rx")
+    config.link(c, "server.tx -> generator.input")
 
-	engine.busywait = true
-	engine.configure(c)
-	engine.main({duration = 100})
-	
-	print("Completed 100s.")
+    engine.busywait = true
+    engine.configure(c)
+    engine.main({duration = 100})
+
+    print("Completed 100s.")
 end

@@ -94,38 +94,38 @@ function Requester:push()
 end
 
 function show_usage(code)
-	print(require("program.MultiDimSnabb.Client.README_inc"))
-	main.exit(code)
+    print(require("program.MultiDimSnabb.Client.README_inc"))
+    main.exit(code)
 end
 
 function run(args)
-	if #args ~= 4 then 
-        show_usage(1) 
+    if #args ~= 4 then 
+	show_usage(1) 
     end
 
-	local c = config.new()
+    local c = config.new()
 
-	local IF       = args[1]
-	local src_eth  = args[2]
-	local dst_eth  = args[3]
-	local key      = args[4]
+    local IF       = args[1]
+    local src_eth  = args[2]
+    local dst_eth  = args[3]
+    local key      = args[4]
 
-	config.app(c, "requester", Requester, 
-	{
-		src_eth = src_eth,
-		dst_eth = dst_eth,
-		req_key = key
-	})
+    config.app(c, "requester", Requester, 
+    {
+	src_eth = src_eth,
+	dst_eth = dst_eth,
+	req_key = key
+    })
 
-	local RawSocket = raw_sock.RawSocket
-	config.app(c, "server", RawSocket, IF)
+    local RawSocket = raw_sock.RawSocket
+    config.app(c, "server", RawSocket, IF)
 
-	config.link(c, "requester.output -> server.rx")
-	config.link(c, "server.tx -> requester.input")
+    config.link(c, "requester.output -> server.rx")
+    config.link(c, "server.tx -> requester.input")
 
-	engine.busywait = true
-	engine.configure(c)
-	engine.main({duration = 100})
-	
-	print("Completed 100s.")
+    engine.busywait = true
+    engine.configure(c)
+    engine.main({duration = 100})
+
+    print("Completed 100s.")
 end

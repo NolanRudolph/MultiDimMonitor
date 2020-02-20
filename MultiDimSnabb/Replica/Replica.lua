@@ -25,20 +25,20 @@ local C = ffi.c
 Incubator = {}
 
 function Incubator:new(args)
-	local src_eth = args["src_eth"]
-        local dst_eth = args["dst_eth"]
-	local disktype = args["disktype"]
+    local src_eth = args["src_eth"]
+    local dst_eth = args["dst_eth"]
+    local disktype = args["disktype"]
 
-	local access_time = 0
-	-- Disk access time
-	if disktype == "HDD" then
-		access_time = 0.005
-	elseif disktype == "SSD" then
-		access_time = 0.0000001
-	else
-		print("Unknown disk type.")
-		main.exit(1)
-	end
+    local access_time = 0
+    -- Disk access time
+    if disktype == "HDD" then
+	access_time = 0.005
+    elseif disktype == "SSD" then
+	access_time = 0.0000001
+    else
+	print("Unknown disk type.")
+	main.exit(1)
+    end
 
     local o =
     {
@@ -47,62 +47,63 @@ function Incubator:new(args)
         access_time = access_time
     }
 
-	return setmetatable(o, {__index = Incubator})
+    return setmetatable(o, {__index = Incubator})
 end
 
 function Incubator:pull()
-	assert(self.output.output, "Could not locate output port.")
-	assert(self.input.input, "Could not locate input port.")
-	local i = self.input.input
-	local o = self.output.output
-	while not link.empty(i) do
-		local p = link.receive(i)
-		os.execute("sleep " .. self.access_time)
-		local dgram = datagram:new(p, ethernet, ipv4, _udp)
-		dgram:parse_n(3)
-		local eth, _, _ = unpack(dgram:stack())
-		local eth_src = tostring(ethernet:ntop(eth:src()))
-		local eth_dst = tostring(ethernet:ntop(eth:dst()))
-		local eth_type = eth:type()
-		if eth_src == self.exp_src_ether and eth_dst == self.exp_dst_ether and eth_type == 20 then
-			print("Responding...")
-			local telegram = datagram:new()
-			eth:swap()
-			telegram:push(eth)
-			link.transmit(o, telegram:packet())
-		end
+    assert(self.output.output, "Could not locate output port.")
+    assert(self.input.input, "Could not locate input port.")
+    local i = self.input.input
+    local o = self.output.output
+
+    while not link.empty(i) do
+	local p = link.receive(i)
+	os.execute("sleep " .. self.access_time)
+	local dgram = datagram:new(p, ethernet, ipv4, _udp)
+	dgram:parse_n(3)
+	local eth, _, _ = unpack(dgram:stack())
+	local eth_src = tostring(ethernet:ntop(eth:src()))
+	local eth_dst = tostring(ethernet:ntop(eth:dst()))
+	local eth_type = eth:type()
+	if eth_src == self.exp_src_ether and eth_dst == self.exp_dst_ether and eth_type == 20 then
+	    print("Responding...")
+	    local telegram = datagram:new()
+	    eth:swap()
+	    telegram:push(eth)
+	    link.transmit(o, telegram:packet())
 	end
+    end
 end
 
 function show_usage(code)
-	print(require("program.MultiDimSnabb.Replica.README_inc"))
-	main.exit(code)
+    print(require("program.MultiDimSnabb.Replica.README_inc"))
+    main.exit(code)
 end
 
 function run(args)
-	if #args ~= 4 then show_usage(1) end
-	local c = config.new()
+    if #args ~= 4 then show_usage(1) end
+    local c = config.new()
 
-	local src_eth  = args[1]
-	local dst_eth  = args[2]
-	local IF       = args[3]
-	local disktype = args[4]
+    local src_eth  = args[1]
+    local dst_eth  = args[2]
+    local IF       = args[3]
+    local disktype = args[4]
 
-	local RawSocket = raw_sock.RawSocket
-	config.app(c, "socket", RawSocket, IF)
+    local RawSocket = raw_sock.RawSocket
+    config.app(c, "socket", RawSocket, IF)
 
-	config.app(c, "incubator", Incubator, 
-	{
-		src_eth = src_eth,
-		dst_eth = dst_eth,
-		disktype = disktype
-	})
+    config.app(c, "incubator", Incubator, 
+    {
+	src_eth = src_eth,
+	dst_eth = dst_eth,
+	disktype = disktype
+    })
 
-	config.link(c, "socket.tx -> incubator.input")
-	config.link(c, "incubator.output -> socket.rx")
+    config.link(c, "socket.tx -> incubator.input")
+    config.link(c, "incubator.output -> socket.rx")
 
-	engine.busywait = true
-	engine.configure(c)
-	engine.main({report = {showlinks = true}})
-	
+    engine.busywait = true
+    engine.configure(c)
+    engine.main({report = {showlinks = true}})
+
 end
