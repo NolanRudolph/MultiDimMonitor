@@ -28,7 +28,9 @@ For replica nodes looking to synchronize databases with one another, test best l
   <img width="640" height="480" src="./MultiDimMonitorSketch.png">
 </p>
 
-**Video**  
-[![Watch the Video Documentation](https://img.youtube.com/vi/6sDCWKST4EY/maxresdefault.jpg)](https://youtu.be/6sDCWKST4EY)
+**Video**
+<p align="center">
+  [![Watch the Video Documentation](https://img.youtube.com/vi/6sDCWKST4EY/hqdefault.jpg)](https://youtu.be/6sDCWKST4EY)
+</p>
 
 All personal user space tests were ran on the CloudLab profile ConTools/MultiDimMonitor: https://www.cloudlab.us/p/afec508c-47d6-11ea-b1eb-e4434b2381fc.
