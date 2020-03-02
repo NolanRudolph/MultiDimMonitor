@@ -1,11 +1,10 @@
 <!-- Apache Maven XML file for creating a compatible .jar snitch for Apache Cassandra -->
-<!-- Thanks to https://github.com/smartcat-labs/custom-snitch for the Custom Snitch skeleton template -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>NolanRudolph.Cassandra</groupId>
+    <groupId>io.custom</groupId>
     <artifactId>CustomSnitch</artifactId>
     <version>1</version>
     <packaging>jar</packaging>
@@ -21,11 +20,15 @@
         <tag>HEAD</tag>
     </scm>
 
+    <prerequisites>
+        <maven>3.3.9</maven>
+    </prerequisites>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <source.level>1.7</source.level>
         <code.level>1.7</code.level>
-        <version.cassandra>2.1.14</version.cassandra>
+        <version.cassandra>3.11.5</version.cassandra>
         <version.plugin.jar>2.6</version.plugin.jar>
         <version.plugin.compiler>3.5.1</version.plugin.compiler>
         <version.plugin.source>3.0.0</version.plugin.source>

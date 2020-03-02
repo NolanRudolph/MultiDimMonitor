@@ -33,11 +33,17 @@ fi
 cat ./Cassandra/cassandra.yaml > /etc/cassandra/cassandra.yaml;
 cat ./Cassandra/cassandra-env.sh > /etc/cassandra/cassandra-env.sh;
 
-# If all goes well, the following command should not return an error
-nodetool status;
+# If all goes well, the following command should not return an error: "nodetool status"
 # If this returns error "Cassandra Failed to connect to '127.0.0.1:7199' Connection refused."
 # then try changing JVM_OPTS="$JVM_OPTS -Djava.rmi.server.hostname=127.0.0.1" in /etc/cassandra/default.conf/cassandra-env.sh
 # to JVM_OPTS="$JVM_OPTS -Djava.rmi.server.hostname=<public name>" where <public name> is the address you want to connect to
+
+# Install maven if not already installed
+if [ -z $(which mvn) ]
+then
+    echo "Installing maven...";
+    sudo apt-get install -y maven;
+fi
 
 # Install pip if not already installed
 if [ -z $(which pip) ]
