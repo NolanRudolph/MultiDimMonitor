@@ -1,25 +1,23 @@
+<!-- Apache Maven XML file for creating a compatible .jar snitch for Apache Cassandra -->
+<!-- Thanks to https://github.com/smartcat-labs/custom-snitch for the Custom Snitch skeleton template -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.smartcat</groupId>
-    <artifactId>custom-snitch</artifactId>
-    <version>0.1.0</version>
+    <groupId>NolanRudolph.Cassandra</groupId>
+    <artifactId>CustomSnitch</artifactId>
+    <version>1</version>
     <packaging>jar</packaging>
 
     <name>Custom Cassandra Snitch</name>
-    <description>Skeleton project for custome Cassandra Snitch implementation</description>
-    <url>https://github.com/smartcat-labs/custom-snitch</url>
-
-    <issueManagement>
-        <system>github.com</system>
-        <url>https://github.com/smartcat-labs/custom-snitch/issues</url>
-    </issueManagement>
+    <description>Custom Snitch Implementation for Multi-Dimensional Monitor</description>
+    <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
 
     <scm>
-        <connection>scm:git:git@github.com:smartcat-labs/custom-snitch.git</connection>
-        <developerConnection>scm:git@github.com:smartcat-labs/custom-snitch.git</developerConnection>
-        <url>https://github.com/smartcat-labs/custom-snitch</url>
+        <connection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</connection>
+        <developerConnection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</developerConnection>
+        <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
         <tag>HEAD</tag>
     </scm>
 
