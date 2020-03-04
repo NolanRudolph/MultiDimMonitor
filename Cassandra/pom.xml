@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.custom</groupId>
+    <groupId>org.apache.cassandra.locator</groupId>
     <artifactId>CustomSnitch</artifactId>
     <version>1</version>
     <packaging>jar</packaging>
@@ -12,13 +12,6 @@
     <name>Custom Cassandra Snitch</name>
     <description>Custom Snitch Implementation for Multi-Dimensional Monitor</description>
     <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
-
-    <scm>
-        <connection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</connection>
-        <developerConnection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</developerConnection>
-        <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <prerequisites>
         <maven>3.3.9</maven>
