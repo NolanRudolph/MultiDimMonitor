@@ -126,39 +126,40 @@ function Generator:gen_packet()
 end
 
 function Generator:pull()
-    if self.wait == 400000 then
-	self.wait = 0
+    if self.wait == 100000 then
+        self.wait = 0
         best_eth = nil
         -- We expect a latency less than 1000ms
-	best = 1
-	i = 0
-	print("------- TIMES --------")
-	for eth, dt in pairs(net_eths) do
-	    i = i + 1
-	    if dt < best then
-	        best_eth = eth
-		best = dt
-	    end	
-	    if dt > 1 then
-	        print(cor_rep[eth] .. ": OFFLINE")
-    	    else
+        best = 1
+        i = 0
+        print("------- TIMES --------")
+        for eth, dt in pairs(net_eths) do
+            i = i + 1
+            if dt < best then
+                best_eth = eth
+            best = dt
+            end	
+            -- Write to file for Cassandra
+            local f = io.open("/" .. cor_ip[eth], "w+")
+            if dt > 1 then
+                f:write("1.0")
+                print(cor_rep[eth] .. ": OFFLINE")
+            else
+                f:write(tostring(dt))
                 print(cor_rep[eth] .. ": " .. tostring(dt))
             end
-	end
+            io.close(f)
+        end
 
-	-- Terminal inform and write to file for Cassandra
-	print("----------------------")
+        print("----------------------")
         if best == 1 then
             print("BEST NODE: N/A")
         else
             print("BEST NODE: " .. cor_rep[best_eth])
-            print("Writing " .. cor_ip[best_eth] .. " to file.")
-            f = io.open("best_node.txt", "w+")
-            f:write(cor_ip[best_eth] .. '\n')
-            io.close(f)
         end
-		print("----------------------\n")
-	elseif self.wait % 100000 == 0 then
+        print("----------------------\n")
+
+	elseif self.wait % 25000 == 0 then
 		self.wait = self.wait + 1
 		self:gen_packet()
 	else

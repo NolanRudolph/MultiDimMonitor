@@ -43,6 +43,8 @@ import org.apache.cassandra.utils.MBeanWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+
 /**
  * A dynamic snitch that sorts endpoints by latency with an adapted phi failure detector
  */
@@ -272,8 +274,22 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
         {
             if (scores.get(entry.getKey()) != null)
             {
-                // Read score from file
-                newScores.put(entry.getKey(), 0.5);
+                // Read score from file, saturated by Snabb
+                String val = "1.0";
+                File file = null;
+                try
+                {
+                    file = new File(entry.getKey().getHostAddress());
+                    BufferedReader br = new BufferedReader(new FileReader(file));
+                    val = br.readLine();
+                }
+                catch (Exception e) 
+                {
+                    logger.info("PATH: '" + new File(".").getAbsolutePath() + "'");
+                    logger.error("ERROR: " + e);
+                }
+
+                newScores.put(entry.getKey(), Double.parseDouble(val));
             }
             else
             {
