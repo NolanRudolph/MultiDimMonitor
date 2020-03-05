@@ -267,20 +267,18 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             snapshots.put(entry.getKey(), entry.getValue().getSnapshot());
         }
 
-        // We're going to weight the latency for each host against the worst one we see, to
-        // arrive at sort of a 'badness percentage' for them. First, find the worst for each:
         HashMap<InetAddress, Double> newScores = new HashMap<>();
         for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
         {
-            double mean = entry.getValue().getMedian();
-            if (mean > maxLatency)
-                maxLatency = mean;
-        }
-        // now make another pass to do the weighting based on the maximums we found before
-        for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
-        {
-            double score = entry.getValue().getMedian() / maxLatency;
-            newScores.put(entry.getKey(), score);
+            if (scores.get(entry.getKey()) != null)
+            {
+                // Read score from file
+                newScores.put(entry.getKey(), 0.5);
+            }
+            else
+            {
+                newScores.put(entry.getKey(), 1.0);
+            }
         }
         
         // DEBUGGING
