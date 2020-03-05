@@ -315,39 +315,4 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
     {
         return subsnitch.getClass().getName();
     }
-
-    public List<Double> dumpTimings(String hostname) throws UnknownHostException
-    {
-        InetAddress host = InetAddress.getByName(hostname);
-        ArrayList<Double> timings = new ArrayList<Double>();
-        ExponentiallyDecayingReservoir sample = samples.get(host);
-        if (sample != null)
-        {
-            for (double time: sample.getSnapshot().getValues())
-                timings.add(time);
-        }
-        return timings;
-    }
-
-    public boolean isWorthMergingForRangeQuery(List<InetAddress> merged, List<InetAddress> l1, List<InetAddress> l2)
-    {
-        // Accomplished by snabb
-        return false;
-    }
-
-    // Return the max score for the endpoint in the provided list, or -1.0 if no node have a score.
-    private double maxScore(List<InetAddress> endpoints)
-    {
-        double maxScore = -1.0;
-        for (InetAddress endpoint : endpoints)
-        {
-            Double score = scores.get(endpoint);
-            if (score == null)
-                continue;
-
-            if (score > maxScore)
-                maxScore = score;
-        }
-        return maxScore;
-    }
 }

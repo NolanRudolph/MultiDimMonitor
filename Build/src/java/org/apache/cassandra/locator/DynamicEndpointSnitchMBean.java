@@ -28,7 +28,6 @@ public interface DynamicEndpointSnitchMBean
     public int getUpdateInterval();
     public int getResetInterval();
     public String getSubsnitchClassName();
-    public List<Double> dumpTimings(String hostname) throws UnknownHostException;
 
     // Note: I deleted severity because it messed with evaluation, but this is important
     /**
