@@ -285,7 +285,7 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
         logger.info("SCORES");
         for (Map.Entry<InetAddress, Double> entry : newScores.entrySet())
         {
-            logger.info(entry.getKey() + " : " + entry.getValue());
+            logger.info(entry.getKey().getHostAddress() + " : " + entry.getValue());
         }
         // DEBUGGING END
 
