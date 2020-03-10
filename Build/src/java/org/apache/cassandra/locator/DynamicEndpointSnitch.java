@@ -39,11 +39,13 @@ import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.MBeanWrapper;
 
-// Debugging imports
+// Debugging Imports
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// New Implementation Imports
 import java.io.*;
+
 
 /**
  * A dynamic snitch that sorts endpoints by latency with an adapted phi failure detector
@@ -74,6 +76,27 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
     private final Runnable update;
     private final Runnable reset;
 
+    // NEW IMPLEMENTATION
+    // Stores important attributes about a node
+    public class Node
+    {
+        String name;
+        String ip;
+        Double diskAccess;
+        Double noise;
+
+        public Node(String n, String IP, Double dA, Double nos)
+        {
+            name = n;
+            ip = IP;
+            diskAccess = dA;
+            noise = nos;
+        }
+    }
+
+    // List to be referenced for updating scores
+    HashMap<String, Node> nodeConfigs = new HashMap<String, Node>();
+
     // Debugging to system.log
     protected static final Logger logger = LoggerFactory.getLogger(DynamicEndpointSnitch.class);
 
@@ -84,6 +107,32 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
 
     public DynamicEndpointSnitch(IEndpointSnitch snitch, String instance)
     {
+        // NEW IMPLEMENTATION
+        try
+        {
+            File file = new File("cassandra_config.txt");
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            int nodes = Integer.parseInt(br.readLine());
+            for (int i = 0; i < nodes; i++)
+            {
+                String curConfig = br.readLine();
+                String[] configParse = curConfig.split(",");
+                String name  = configParse[0];  // Name of Node
+                String ip    = configParse[1];  // IP of Node
+                Double dA    = Double.parseDouble(configParse[2]);  // Disk Access Time
+                Double noise = Double.parseDouble(configParse[3]);  // Synthetic Noise of Node
+                Node newNode = new Node(name, ip, dA, noise);
+
+                // Store back into nodeConfigs with key being the IP
+                // This allows for easy indexing since this module heavily utilizes IPs
+                nodeConfigs.put(ip, newNode);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("ERROR: " + e);
+        }
+
         mbeanName = "org.apache.cassandra.db:type=DynamicEndpointSnitch";
         if (instance != null)
             mbeanName += ",instance=" + instance;
@@ -269,39 +318,46 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             snapshots.put(entry.getKey(), entry.getValue().getSnapshot());
         }
 
+        // We're going to weight the latency for each host against the worst one we see, to
+        // arrive at sort of a 'badness percentage' for them. First, find the worst for each:
         HashMap<InetAddress, Double> newScores = new HashMap<>();
         for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
         {
-            if (scores.get(entry.getKey()) != null)
-            {
-                // Read score from file, saturated by Snabb
-                String val = "1.0";
-                File file = null;
-                try
-                {
-                    file = new File(entry.getKey().getHostAddress());
-                    BufferedReader br = new BufferedReader(new FileReader(file));
-                    val = br.readLine();
-                }
-                catch (Exception e) 
-                {
-                    logger.info("PATH: '" + new File(".").getAbsolutePath() + "'");
-                    logger.error("ERROR: " + e);
-                }
+            double mean = entry.getValue().getMedian();
+            if (mean > maxLatency)
+                maxLatency = mean;
+        }
+        // now make another pass to do the weighting based on the maximums we found before
+        for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
+        {
+            double score = entry.getValue().getMedian() / maxLatency;
+            // New Implementation
+            double influence = 0.0; 
+            logger.info("Looking for key: " + entry.getKey().getHostAddress());
+            Node curNode = nodeConfigs.get(entry.getKey().getHostAddress());
+            // Example of influence modifications
+            influence += curNode.diskAccess;
+            influence += curNode.noise;
+            logger.info("Score before influence: " + Double.toString(score));
 
-                newScores.put(entry.getKey(), Double.parseDouble(val));
-            }
-            else
+            // Add this to the score
+            score += influence;
+            logger.info("Score after influence: " + Double.toString(score));
+
+            // Can't allow score to exceed 1.0
+            if (score > 1.0)
             {
-                newScores.put(entry.getKey(), 1.0);
+                score = 1.0;
             }
+
+            newScores.put(entry.getKey(), score);
         }
         
         // DEBUGGING
         logger.info("SCORES");
         for (Map.Entry<InetAddress, Double> entry : newScores.entrySet())
         {
-            logger.info(entry.getKey().getHostAddress() + " : " + entry.getValue());
+            logger.info(entry.getKey() + " : " + entry.getValue());
         }
         // DEBUGGING END
 
@@ -331,4 +387,40 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
     {
         return subsnitch.getClass().getName();
     }
+
+    public List<Double> dumpTimings(String hostname) throws UnknownHostException
+    {
+        InetAddress host = InetAddress.getByName(hostname);
+        ArrayList<Double> timings = new ArrayList<Double>();
+        ExponentiallyDecayingReservoir sample = samples.get(host);
+        if (sample != null)
+        {
+            for (double time: sample.getSnapshot().getValues())
+                timings.add(time);
+        }
+        return timings;
+    }
+
+    public boolean isWorthMergingForRangeQuery(List<InetAddress> merged, List<InetAddress> l1, List<InetAddress> l2)
+    {
+        // Accomplished by snabb
+        return false;
+    }
+
+    // Return the max score for the endpoint in the provided list, or -1.0 if no node have a score.
+    private double maxScore(List<InetAddress> endpoints)
+    {
+        double maxScore = -1.0;
+        for (InetAddress endpoint : endpoints)
+        {
+            Double score = scores.get(endpoint);
+            if (score == null)
+                continue;
+
+            if (score > maxScore)
+                maxScore = score;
+        }
+        return maxScore;
+    }
 }
+

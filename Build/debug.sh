@@ -9,4 +9,3 @@ rm -rf /usr/share/cassandra/lib;
 cp -r ./lib /usr/share/cassandra;
 
 service cassandra restart;
-tail -f /var/log/cassandra/system.log | grep "DynamicEndpointSnitch.java";
