@@ -310,8 +310,6 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             }
 
         }
-        double maxLatency = 1;
-        double maxDiskAccess = 0.0001;
 
         Map<InetAddress, Snapshot> snapshots = new HashMap<>(samples.size());
         for (Map.Entry<InetAddress, ExponentiallyDecayingReservoir> entry : samples.entrySet())
@@ -319,50 +317,31 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             snapshots.put(entry.getKey(), entry.getValue().getSnapshot());
         }
 
-        // We're going to weight the latency for each host against the worst one we see, to
-        // arrive at sort of a 'badness percentage' for them. First, find the worst for each:
         HashMap<InetAddress, Double> newScores = new HashMap<>();
+
+        // Loop over all nodes and find the best latency + diskAccess
         for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
         {
-            double mean = entry.getValue().getMedian();
-            if (mean > maxLatency)
-                maxLatency = mean;
+            /* OPTION 2 */
+            double latency = entry.getValue().getMedian();
 
-            double diskAccess = nodeConfigs.get(entry.getKey().getHostAddress()).diskAccess;
-            // A diskAccess of 1.0 is used to denote the host node
-            if (diskAccess > maxDiskAccess & diskAccess != 1.0)
-            {
-                maxDiskAccess = diskAccess;
-            }
-        }
-        // now make another pass to do the weighting based on the maximums we found before
-        for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
-        {
-            double score = entry.getValue().getMedian() / maxLatency;
-
-            /* OPTION 1 */
-            double influence = 0.0; 
-            Node curNode = nodeConfigs.get(entry.getKey().getHostAddress());
-
-            // Divide by maxDiskAccess analagous to the score calculation seen above
-            influence += curNode.diskAccess / maxDiskAccess;
+            String curIP = entry.getKey().getHostAddress();
+            Node curNode = nodeConfigs.get(curIP);
+            double diskAccess = curNode.diskAccess;
 
             // Debugging
-            logger.info("(" + entry.getKey().getHostAddress() + ") " 
-                        + "Initial Score: " + Double.toString(score) + " | "
-                        + "Influenced Score: " + Double.toString(score + influence));
+            logger.info("(" + curIP + ") "
+                        + "Latency: " + latency + " | "
+                        + "DiskAccess: " + diskAccess + " | "
+                        + "Net: " + Double.toString(latency + diskAccess));
 
-            // Add this to the score
-            score += influence;
+            // To be modified with more factors at a later time
+            double netEffeciency = latency + diskAccess;
+            netEffeciency = netEffeciency > 1.0 ? 1.0 : netEffeciency;
+            /* END OPTION 2 */
 
-            // Can't allow score to exceed 1.0
-            if (score > 1.0)
-            {
-                score = 1.0;
-            }
-            /* END OPTION 1 */
-
-            newScores.put(entry.getKey(), score);
+            // DynamicSnitch automatically chooses lowest scored node, so this method works
+            newScores.put(entry.getKey(), netEffeciency);
         }
         
         // DEBUGGING
