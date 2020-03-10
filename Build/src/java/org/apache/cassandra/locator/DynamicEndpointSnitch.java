@@ -311,6 +311,7 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
 
         }
         double maxLatency = 1;
+        double maxDiskAccess = 0.0001;
 
         Map<InetAddress, Snapshot> snapshots = new HashMap<>(samples.size());
         for (Map.Entry<InetAddress, ExponentiallyDecayingReservoir> entry : samples.entrySet())
@@ -326,29 +327,40 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             double mean = entry.getValue().getMedian();
             if (mean > maxLatency)
                 maxLatency = mean;
+
+            double diskAccess = nodeConfigs.get(entry.getKey().getHostAddress()).diskAccess;
+            // A diskAccess of 1.0 is used to denote the host node
+            if (diskAccess > maxDiskAccess & diskAccess != 1.0)
+            {
+                maxDiskAccess = diskAccess;
+            }
         }
         // now make another pass to do the weighting based on the maximums we found before
         for (Map.Entry<InetAddress, Snapshot> entry : snapshots.entrySet())
         {
             double score = entry.getValue().getMedian() / maxLatency;
-            // New Implementation
+
+            /* OPTION 1 */
             double influence = 0.0; 
-            logger.info("Looking for key: " + entry.getKey().getHostAddress());
             Node curNode = nodeConfigs.get(entry.getKey().getHostAddress());
-            // Example of influence modifications
-            influence += curNode.diskAccess;
-            influence += curNode.noise;
-            logger.info("Score before influence: " + Double.toString(score));
+
+            // Divide by maxDiskAccess analagous to the score calculation seen above
+            influence += curNode.diskAccess / maxDiskAccess;
+
+            // Debugging
+            logger.info("(" + entry.getKey().getHostAddress() + ") " 
+                        + "Initial Score: " + Double.toString(score) + " | "
+                        + "Influenced Score: " + Double.toString(score + influence));
 
             // Add this to the score
             score += influence;
-            logger.info("Score after influence: " + Double.toString(score));
 
             // Can't allow score to exceed 1.0
             if (score > 1.0)
             {
                 score = 1.0;
             }
+            /* END OPTION 1 */
 
             newScores.put(entry.getKey(), score);
         }
@@ -357,7 +369,7 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
         logger.info("SCORES");
         for (Map.Entry<InetAddress, Double> entry : newScores.entrySet())
         {
-            logger.info(entry.getKey() + " : " + entry.getValue());
+            logger.info(entry.getKey().getHostAddress() + " : " + entry.getValue());
         }
         // DEBUGGING END
 
