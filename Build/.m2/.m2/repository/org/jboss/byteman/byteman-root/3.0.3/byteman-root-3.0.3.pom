@@ -1,0 +1,472 @@
+<!--
+  ~ JBoss, Home of Professional Open Source
+  ~ Copyright 2011, Red Hat and individual contributors as identified
+  ~ by the @authors tag. See the copyright.txt in the distribution for a
+  ~ full listing of individual contributors.
+  ~
+  ~ This is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU Lesser General Public License as
+  ~ published by the Free Software Foundation; either version 2.1 of
+  ~ the License, or (at your option) any later version.
+  ~
+  ~ This software is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  ~ Lesser General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Lesser General Public
+  ~ License along with this software; if not, write to the Free
+  ~ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+  ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+  ~
+  ~ @authors Andrew Dinn
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.byteman</groupId>
+    <artifactId>byteman-root</artifactId>
+    <packaging>pom</packaging>
+    <description>
+        Byteman is a java agent-based bytecode injection tool. It can be used to inject Event Condition Action rules
+        into Java application and JVM runtime methods. Its primary purpose is to support execution tracing and fault
+        injection testing.
+    </description>
+    <version>3.0.3</version>
+    <name>byteman-root</name>
+    <url>http://www.jboss.org/byteman</url>
+
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://jira.jboss.org/jira/browse/BYTEMAN/</url>
+    </issueManagement>
+    <licenses>
+        <license>
+            <name>LGPL 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/adinn/byteman.git</connection>
+        <developerConnection>scm:git:git://github.com/adinn/byteman.git</developerConnection>
+        <url>http://fisheye.jboss.org/browse/byteman/</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>adinn</id>
+            <name>Andrew Dinn</name>
+            <email>adinn@redhat.com</email>
+            <organization>JBoss</organization>
+            <organizationUrl>http://www.jboss.org/</organizationUrl>
+            <roles>
+                <role>project lead</role>
+            </roles>
+            <timezone>0</timezone>
+        </developer>
+        <developer>
+            <id>kabir.khan@jboss.com</id>
+            <name>Kabir Khan</name>
+            <email>kabir.khan@jboss.com</email>
+            <organization>JBoss</organization>
+            <organizationUrl>http://www.jboss.org/</organizationUrl>
+            <roles>
+                <role>contributing developer</role>
+            </roles>
+            <timezone>0</timezone>
+        </developer>
+    </developers>
+    <repositories>
+        <repository>
+            <id>ow2</id>
+            <name>ow2 release repository</name>
+            <url>http://repository.ow2.org/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <!-- obviously we need to use the Sonatype staging repo for upload -->
+        <snapshotRepository>
+            <id>sonatype-snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-releases-repository</id>
+            <name>Sonatype Releases Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <!-- actual path to tools.jar is defined in the profiles below -->
+        <tools.jar>/file-not-found/tools.jar</tools.jar>
+
+        <!-- Decouple file encoding of the platform encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- maven-release-plugin -->
+        <useReleaseProfile>false</useReleaseProfile>
+        <pushChanges>false</pushChanges>
+        <autoVersionSubmodules>true</autoVersionSubmodules>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+             <!-- Internal dependencies -->
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-submit</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-submit</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-submit</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-install</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-install</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-install</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-sample</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-sample</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-sample</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-bmunit</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-bmunit</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-bmunit</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-dtest</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-dtest</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-dtest</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-jboss-modules-plugin</artifactId>
+                 <version>${project.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-jboss-modules-plugin</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>sources</classifier>
+             </dependency>
+             <dependency>
+                 <groupId>org.jboss.byteman</groupId>
+                 <artifactId>byteman-jboss-modules-plugin</artifactId>
+                 <version>${project.version}</version>
+                 <classifier>javadoc</classifier>
+             </dependency>
+
+             <!-- External dependencies -->
+            <dependency>
+                 <groupId>org.ow2.asm</groupId>
+                 <artifactId>asm-all</artifactId>
+                 <version>5.0.3</version>
+            </dependency>
+            <dependency>
+                 <groupId>org.ow2.asm</groupId>
+                 <artifactId>asm-debug-all</artifactId>
+                 <version>5.0.3</version>
+            </dependency>
+             <dependency>
+                 <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
+                 <artifactId>java-cup</artifactId>
+                 <version>0.11a</version>
+             </dependency>
+            <dependency>
+                 <groupId>de.jflex</groupId>
+                 <artifactId>jflex</artifactId>
+                 <version>1.4.3</version>
+            </dependency>
+             <dependency>
+                 <groupId>junit</groupId>
+                 <artifactId>junit</artifactId>
+                 <version>4.8.2</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.testng</groupId>
+                 <artifactId>testng</artifactId>
+                 <version>6.8.5</version>
+             </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.4.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>1.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.9</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-verifier-plugin</artifactId>
+                    <version>1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                  <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>javadoc-jar</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <modules>
+        <module>submit</module>
+        <module>agent</module>
+        <module>install</module>
+        <module>contrib/bmunit</module>
+        <module>contrib/dtest</module>
+        <module>contrib/rulecheck-maven-plugin</module>
+        <module>contrib/jboss-modules-system</module>
+        <module>sample</module>
+        <module>download</module>
+    </modules>
+
+    <profiles>
+      <profile>
+        <!-- normally tools jar is in ../lib/tools.jar -->
+        <id>default-toolsjar-profile</id>
+        <activation>
+          <file>
+            <exists>${java.home}/../lib/tools.jar</exists>
+          </file>
+        </activation>
+        <properties>
+          <tools.jar>${java.home}/../lib/tools.jar</tools.jar>
+        </properties>
+      </profile>
+      <!-- We override the tools.jar property on mac osx -->
+      <profile>
+        <!-- on pre-jdk7 mac releases tools jar is in ../Classes/classes.jar -->
+        <id>mac-toolsjar-profile</id>
+        <activation>
+          <file>
+            <exists>${java.home}/../Classes/classes.jar</exists>
+          </file>
+        </activation>
+        <properties>
+          <tools.jar>${java.home}/../Classes/classes.jar</tools.jar>
+        </properties>
+      </profile>
+      <!--
+	  new profile for releasing to maven central
+	  to do a release update the version number from a SNAPSHOT
+	  version to a full version and execute
+	  
+	    mvn -P centralRelease deploy
+
+	  you will need to have permission to upload the jars to
+	  the sonatype repo and to have configured the relevant gpg
+	  key settings in ~/.m2/settings.xml
+
+            <profile>
+              <id>centralRelease</id>
+              <properties>
+                  <gpg.passphrase>XXXXXXXXXX</gpg.passphrase>
+              </properties>
+            </profile>
+
+       you will also need to include a user name and
+       password entry for the nexus server and the nexus
+       snapshot server - note that the ids must match the
+       ones used in the repositories section of this pom
+
+            <servers>
+              <server>
+                <id>sonatype-releases-repository</id>
+                <username>NNNNNNNN</username>
+                <password>PPPPPPPP</password>
+              </server>
+              <server>
+                <id>sonatype-snapshots-repository</id>
+                <username>NNNNNNNN</username>
+                <password>PPPPPPPP</password>
+              </server>
+           </servers>
+      -->
+      <profile>
+          <id>centralRelease</id>
+          <!-- we need to be able to sign the jars we install -->
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-gpg-plugin</artifactId>
+                      <configuration>
+                          <passphrase>${gpg.passphrase}</passphrase>
+                          <useAgent>${gpg.useAgent}</useAgent>
+                      </configuration>
+                      <executions>
+                          <execution>
+                              <id>sign-artifacts</id>
+                              <phase>verify</phase>
+                              <goals>
+                                  <goal>sign</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+    </profiles>
+</project>

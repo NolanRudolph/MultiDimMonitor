@@ -1,0 +1,93 @@
+<!-- Apache Maven XML file for creating a compatible .jar snitch for Apache Cassandra -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.custom</groupId>
+    <artifactId>CustomSnitch</artifactId>
+    <version>1</version>
+    <packaging>jar</packaging>
+
+    <name>Custom Cassandra Snitch</name>
+    <description>Custom Snitch Implementation for Multi-Dimensional Monitor</description>
+    <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
+
+    <scm>
+        <connection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</connection>
+        <developerConnection>scm:git:git@github.com:NolanRudolph/MultiDimMonitor.git</developerConnection>
+        <url>https://github.com/NolanRudolph/MultiDimMonitor</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <prerequisites>
+        <maven>3.3.9</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <source.level>1.7</source.level>
+        <code.level>1.7</code.level>
+        <version.cassandra>3.11.5</version.cassandra>
+        <version.plugin.jar>2.6</version.plugin.jar>
+        <version.plugin.compiler>3.5.1</version.plugin.compiler>
+        <version.plugin.source>3.0.0</version.plugin.source>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>${version.cassandra}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${version.plugin.jar}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.plugin.compiler}</version>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <source>${source.level}</source>
+                        <target>${code.level}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>extras</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${version.plugin.source}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

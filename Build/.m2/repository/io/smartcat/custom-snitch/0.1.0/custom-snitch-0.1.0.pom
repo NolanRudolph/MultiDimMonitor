@@ -1,0 +1,92 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.smartcat</groupId>
+    <artifactId>custom-snitch</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>Custom Cassandra Snitch</name>
+    <description>Skeleton project for custome Cassandra Snitch implementation</description>
+    <url>https://github.com/smartcat-labs/custom-snitch</url>
+
+    <issueManagement>
+        <system>github.com</system>
+        <url>https://github.com/smartcat-labs/custom-snitch/issues</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:smartcat-labs/custom-snitch.git</connection>
+        <developerConnection>scm:git@github.com:smartcat-labs/custom-snitch.git</developerConnection>
+        <url>https://github.com/smartcat-labs/custom-snitch</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <source.level>1.7</source.level>
+        <code.level>1.7</code.level>
+        <version.cassandra>2.1.14</version.cassandra>
+        <version.plugin.jar>2.6</version.plugin.jar>
+        <version.plugin.compiler>3.5.1</version.plugin.compiler>
+        <version.plugin.source>3.0.0</version.plugin.source>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>${version.cassandra}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${version.plugin.jar}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.plugin.compiler}</version>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <source>${source.level}</source>
+                        <target>${code.level}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>extras</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${version.plugin.source}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
