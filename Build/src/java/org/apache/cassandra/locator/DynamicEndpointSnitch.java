@@ -110,7 +110,7 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
         // NEW IMPLEMENTATION
         try
         {
-            File file = new File("cassandra_config.txt");
+            File file = new File("cassandra.config");
             BufferedReader br = new BufferedReader(new FileReader(file));
             int nodes = Integer.parseInt(br.readLine());
             for (int i = 0; i < nodes; i++)
