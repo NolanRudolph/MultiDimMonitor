@@ -14,7 +14,7 @@ CASANDARA_SET_ENV() {
 RUN_YCSB_CASSANDARA() {
 
     cd $YCSBHOME/cassandra
-    $YCSBHOME/cassandra/start_sevice.sh 
+    $YCSBHOME/cassandra/start_service.sh 
 }
 
 

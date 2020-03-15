@@ -8,19 +8,12 @@ OPSCNT=500000
 #on its ip.
 
 DESTROY() {
-	#Make sure we don't have one already running
-	sudo killall java
-	sudo killall java
-	sleep 2
-	sudo killall java
-	sleep 2
-	sudo killall java
-	sleep 2
+    sudo service cassandra stop;
 }
 
 
 RUN_CASSANDARA() {
-    #$YCSBHOME/cassandra/start_sevice.sh
+    #$YCSBHOME/cassandra/start_service.sh
     cd $CSRC
 
     #Delete data folder
@@ -46,16 +39,17 @@ RUN_YCSB() {
 	sleep 5
 
 	#Execute these commands to create ycsb keyspace with cassandra db
-	cqlsh -e "create keyspace ycsb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 }; USE ycsb; create table usertable (y_id varchar primary key, field0 varchar, field1 varchar, field2 varchar,field3 varchar,field4 varchar, field5 varchar, field6 varchar,field7 varchar,field8 varchar,field9 varchar);" #> ~/output
+	cqlsh 192.168.1.1 -e "create keyspace ycsb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 }; USE ycsb; create table usertable (y_id varchar primary key, field0 varchar, field1 varchar, field2 varchar,field3 varchar,field4 varchar, field5 varchar, field6 varchar,field7 varchar,field8 varchar,field9 varchar);" #> ~/output
 
 	#wait
 	sleep 5
 	#Warm up phase. Load the db
-	$YCSBHOME/bin/ycsb load cassandra2-cql -p hosts=$HOST -p port=$PORT -p recordcount=$OPSCNT -P $YCSBHOME/workloads/workloada -s
+	$YCSBHOME/bin/ycsb load cassandra2-cql -p hosts=192.168.1.1 -p port=$PORT -p recordcount=$OPSCNT -P $YCSBHOME/workloads/workloada -s
 	#Wait
 	sleep 5
 	#Run phase
-	$YCSBHOME/bin/ycsb run cassandra2-cql -p hosts=localhost -p port=$PORT -p recordcount=$OPSCNT -P $YCSBHOME/workloads/workloada 
+    # **Modified**
+	$YCSBHOME/bin/ycsb run cassandra2-cql -p hosts=192.168.1.1 -p port=$PORT -p recordcount=$OPSCNT -P $YCSBHOME/workloads/workloada 
 
 	sudo service cassandra stop
 

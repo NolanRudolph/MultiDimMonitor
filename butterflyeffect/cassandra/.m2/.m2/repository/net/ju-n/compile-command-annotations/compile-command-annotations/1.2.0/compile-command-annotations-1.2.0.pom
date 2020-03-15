@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>net.ju-n</groupId>
+    <artifactId>net-ju-n-parent</artifactId>
+    <version>32</version>
+  </parent>
+
+  <groupId>net.ju-n.compile-command-annotations</groupId>
+  <artifactId>compile-command-annotations</artifactId>
+  <version>1.2.0</version>
+
+  <name>Hotspot compile command annotations</name>
+  <inceptionYear>2014</inceptionYear>
+  <description>Annotation based configuration file generator for the Hotspot JVM JIT compiler.</description>
+  <url>http://nicoulaj.github.com/compile-command-annotations</url>
+
+  <scm>
+    <url>http://github.com/nicoulaj/compile-command-annotations</url>
+    <connection>scm:git:git@github.com:nicoulaj/compile-command-annotations.git</connection>
+    <developerConnection>scm:git:git@github.com:nicoulaj/compile-command-annotations.git</developerConnection>
+    <tag>1.2.0</tag>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>http://github.com/nicoulaj/compile-command-annotations/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Travis CI</system>
+    <url>http://travis-ci.org/nicoulaj/compile-command-annotations</url>
+  </ciManagement>
+
+  <distributionManagement>
+    <site>
+      <id>github</id>
+      <url>gitsite:git@github.com/nicoulaj/compile-command-annotations.git</url>
+    </site>
+  </distributionManagement>
+
+  <properties>
+    <license>apache_v2</license>
+    <java.level>1.6</java.level>
+    <guava.version>17.0</guava.version>
+    <fest-assert.version>2.0M10</fest-assert.version>
+    <commons-io.version>2.4</commons-io.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert-core</artifactId>
+      <version>${fest-assert.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.level}</source>
+          <target>${java.level}</target>
+          <compilerArgument>-proc:none</compilerArgument>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-additional-test-source-roots</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/src/samples/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <configuration>
+          <skipInstallation>${skipTests}</skipInstallation>
+          <skipInvocation>${skipTests}</skipInvocation>
+          <localRepositoryPath>${project.build.directory}/it/local-repository</localRepositoryPath>
+          <showErrors>true</showErrors>
+          <settingsFile>src/it/settings.xml</settingsFile>
+          <projectsDirectory>src/it/tests</projectsDirectory>
+          <pomIncludes>
+            <pomInclude>*/pom.xml</pomInclude>
+          </pomIncludes>
+          <cloneProjectsTo>${project.build.directory}/it/tests</cloneProjectsTo>
+          <reportsDirectory>${project.build.directory}/it/reports</reportsDirectory>
+          <addTestClassPath>true</addTestClassPath>
+          <selectorScript>selector.bsh</selectorScript>
+          <goals>
+            <goal>clean</goal>
+            <goal>install</goal>
+          </goals>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-integration-tests</id>
+            <goals>
+              <goal>install</goal>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

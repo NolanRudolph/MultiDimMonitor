@@ -1,0 +1,1 @@
+mapkeeper/ycsb/YCSB/cassandra/start_service.sh: line 38: ../../../cassandra/bin/cassandra: No such file or directory

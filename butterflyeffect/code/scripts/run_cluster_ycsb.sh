@@ -42,7 +42,7 @@ SETUP() {
 RUN_YCSB_CASSANDARA() {
 
     cd $YCSBHOME/cassandra
-    ./start_sevice.sh 
+    ./start_service.sh 
 }
 
 
