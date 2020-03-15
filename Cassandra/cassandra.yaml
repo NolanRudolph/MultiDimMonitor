@@ -612,7 +612,7 @@ ssl_storage_port: 7001
 
 # Set listen_address OR listen_interface, not both. Interfaces must correspond
 # to a single address, IP aliasing is not supported.
-listen_interface: vlan914
+listen_interface: vlan919
 
 # If you choose to specify the interface by name and the interface has an ipv4 and an ipv6 address
 # you can specify which should be chosen using listen_interface_prefer_ipv6. If false the first ipv4
@@ -1252,10 +1252,6 @@ back_pressure_strategy:
 # Enables materialized view creation on this node.
 # Materialized views are considered experimental and are not recommended for production use.
 enable_materialized_views: true
-
-# Enables SASI index creation on this node.
-# SASI indexes are considered experimental and are not recommended for production use.
-enable_sasi_indexes: true
 
 # https://www.digitalocean.com/community/tutorials/how-to-run-a-multi-node-cluster-database-with-cassandra-on-ubuntu-14-04
 auto_bootstrap: false
