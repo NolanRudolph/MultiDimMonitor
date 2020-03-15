@@ -13,7 +13,7 @@ sudo rm -rf /usr/share/cassandra/lib;
 sudo cp -r ./lib /usr/share/cassandra;
 
 # Configuration file to be read by DynamicEndpointSnitch.java
-sudo cp ./cassandra.config /cassandra.config
+sudo cp ./cassandra_config.txt /cassandra_config.txt
 
 # Restart Cassandra
 sudo service cassandra restart;

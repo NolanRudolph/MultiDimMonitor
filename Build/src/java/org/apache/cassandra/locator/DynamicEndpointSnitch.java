@@ -110,7 +110,7 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
         // NEW IMPLEMENTATION
         try
         {
-            File file = new File("cassandra.config");
+            File file = new File("cassandra_config.txt");
             BufferedReader br = new BufferedReader(new FileReader(file));
             int nodes = Integer.parseInt(br.readLine());
             for (int i = 0; i < nodes; i++)
@@ -254,7 +254,6 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
     // Compare endpoints given an immutable snapshot of the scores
     private int compareEndpoints(InetAddress target, InetAddress a1, InetAddress a2, Map<InetAddress, Double> scores)
     {
-        logger.info("CompareEndpoints(target = " + target + ", a1 = " + a1 + ", a2 = " + a2);
         Double scored1 = scores.get(a1);
         Double scored2 = scores.get(a2);
         
@@ -310,8 +309,9 @@ public class DynamicEndpointSnitch extends AbstractEndpointSnitch implements ILa
             }
 
         }
+
         double maxLatency = 1;
-        double maxDiskAccess = 0.0001;
+        double maxDiskAccess = Double.MIN_VALUE;
 
         Map<InetAddress, Snapshot> snapshots = new HashMap<>(samples.size());
         for (Map.Entry<InetAddress, ExponentiallyDecayingReservoir> entry : samples.entrySet())

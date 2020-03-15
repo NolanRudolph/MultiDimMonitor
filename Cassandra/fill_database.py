@@ -23,7 +23,10 @@ def main():
     # Create Table in new keyspace
     session.execute("CREATE TABLE IF NOT EXISTS main (key text PRIMARY KEY, value text)")
     # Add some entries
-    session.execute("INSERT INTO main (key, value) VALUES ('one', 'four')")
+    session.execute("INSERT INTO main (key, value) VALUES ('Hello', 'World')")
+    session.execute("INSERT INTO main (key, value) VALUES ('Nolan', 'Rudolph')")
+    session.execute("INSERT INTO main (key, value) VALUES ('Maddie', 'Forkner')")
+    session.execute("INSERT INTO main (key, value) VALUES ('Comp', 'Sci')")
 
 
     return 0
