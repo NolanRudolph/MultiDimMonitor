@@ -3,6 +3,9 @@
 # Log files: /var/log/cassandra/ and /var/lib/cassandra
 # Startup Opts: /etc/default/cassandra
 
+# Update user's system
+sudo apt-get update > /dev/null;
+
 # Include Apache Cassandra as a aprt of source list
 # COMMENT ME OUT IF NOT DEBIAN -- Instad follow http://cassandra.apache.org/download/
 echo "deb http://www.apache.org/dist/cassandra/debian 311x main" >> /etc/apt/sources.list.d/cassandra.sources.list;
@@ -42,7 +45,7 @@ cat ./Cassandra/cassandra-env.sh > /etc/cassandra/cassandra-env.sh;
 if [ -z $(which mvn) ]
 then
     echo "Installing maven...";
-    sudo apt-get install -y maven;
+    sudo apt-get install -y maven > /dev/null;
 fi
 
 # Install pip if not already installed
@@ -52,11 +55,20 @@ then
     sudo apt-get install -y python-pip > /dev/null;
 fi
 
-# Install cassandra-driver if not already installed
-if [ -z $(which cassandra-driver) ]
+# Install Java if not already installed
+if [ -z $(which java) ]
 then
-    echo "Installing cassandra-driver...";
-    sudo pip install cassandra-driver > /dev/null;
+    echo "Installing Java...";
+    sudo add-apt-repository ppa:webupd8team/java > /dev/null;
+    sudo apt-get -y install oracle-java8-installer > /dev/null;
+    sudo apt-get -y install oracle-java8-set-default > /dev/null;
+fi
+
+# Install JDK 8 if not already installed
+if [ -z $(java -version 2>&1 | grep "openjdk version \"1.8.0_242\"") ]
+then
+    echo "Installing JDK 8...";
+    sudo apt-get install -y openjdk-8-jdk > /dev/null;
 fi
 
 echo "Finished Setup."
