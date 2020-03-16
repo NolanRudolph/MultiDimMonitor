@@ -70,7 +70,7 @@ max_hints_delivery_threads: 2
 
 # Directory where Cassandra should store hints.
 # If not set, the default directory is $CASSANDRA_HOME/data/hints.
-# hints_directory: /var/lib/cassandra/hints
+hints_directory: /var/lib/cassandra/hints
 
 # How often hints should be flushed from the internal buffers to disk.
 # Will *not* trigger fsync.
@@ -422,7 +422,7 @@ seed_provider:
       parameters:
           # seeds is actually a comma-delimited list of addresses.
           # Ex: "<ip1>,<ip2>,<ip3>"
-        - seeds: "192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4,192.168.1.5"
+          - seeds: "192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4,192.168.1.5"
 
 # For workloads with more data than can fit in memory, Cassandra's
 # bottleneck will be reads that need to fetch data from
@@ -497,6 +497,19 @@ concurrent_materialized_view_writes: 32
 # offheap_objects
 #    off heap objects
 memtable_allocation_type: heap_buffers
+
+# Limits the maximum Merkle tree depth to avoid consuming too much
+# memory during repairs.
+#
+# The default setting of 18 generates trees of maximum size around
+# 50 MiB / tree. If you are running out of memory during repairs consider
+# lowering this to 15 (~6 MiB / tree) or lower, but try not to lower it
+# too much past that or you will lose too much resolution and stream
+# too much redundant data during repair. Cannot be set lower than 10.
+#
+# For more details see https://issues.apache.org/jira/browse/CASSANDRA-14096.
+#
+# repair_session_max_tree_depth: 18
 
 # Total space to use for commit logs on disk.
 #
@@ -595,7 +608,7 @@ ssl_storage_port: 7001
 # address associated with the hostname (it might not be).
 #
 # Setting listen_address to 0.0.0.0 is always wrong.
-#
+# listen_address = ???
 
 # Set listen_address OR listen_interface, not both. Interfaces must correspond
 # to a single address, IP aliasing is not supported.
@@ -672,7 +685,7 @@ start_rpc: false
 # set broadcast_rpc_address to a value other than 0.0.0.0.
 #
 # For security reasons, you should not expose this port to the internet.  Firewall it if needed.
-# listen_address: 192.168.1.1
+rpc_address: 192.168.1.1
 
 # Set rpc_address OR rpc_interface, not both. Interfaces must correspond
 # to a single address, IP aliasing is not supported.
@@ -691,7 +704,7 @@ rpc_port: 9160
 # be set to 0.0.0.0. If left blank, this will be set to the value of
 # rpc_address. If rpc_address is set to 0.0.0.0, broadcast_rpc_address must
 # be set.
-rpc_address: 192.168.1.1
+# broadcast_rpc_address: 192.168.1.1
 
 # enable or disable keepalive on rpc/native connections
 rpc_keepalive: true
@@ -838,22 +851,22 @@ sstable_preemptive_open_interval_in_mb: 50
 # inter_dc_stream_throughput_outbound_megabits_per_sec: 200
 
 # How long the coordinator should wait for read operations to complete
-read_request_timeout_in_ms: 5000
+read_request_timeout_in_ms: 20000
 # How long the coordinator should wait for seq or index scans to complete
-range_request_timeout_in_ms: 10000
+range_request_timeout_in_ms: 20000
 # How long the coordinator should wait for writes to complete
-write_request_timeout_in_ms: 2000
+write_request_timeout_in_ms: 20000
 # How long the coordinator should wait for counter writes to complete
-counter_write_request_timeout_in_ms: 5000
+counter_write_request_timeout_in_ms: 20000
 # How long a coordinator should continue to retry a CAS operation
 # that contends with other proposals for the same row
-cas_contention_timeout_in_ms: 1000
+cas_contention_timeout_in_ms: 20000
 # How long the coordinator should wait for truncates to complete
 # (This can be much longer, because unless auto_snapshot is disabled
 # we need to flush first so we can snapshot before removing the data.)
 truncate_request_timeout_in_ms: 60000
 # The default timeout for other, miscellaneous operations
-request_timeout_in_ms: 10000
+request_timeout_in_ms: 20000
 
 # How long before a node logs slow queries. Select queries that take longer than
 # this timeout to execute, will generate an aggregated log message, so that slow queries
@@ -945,7 +958,7 @@ cross_node_timeout: false
 #
 # You can use a custom Snitch by setting this to the full class name
 # of the snitch, which will be assumed to be on your classpath.
-endpoint_snitch: GossipingPropertyFileSnitch
+endpoint_snitch: SimpleSnitch
 
 # controls how often to perform the more expensive part of host score
 # calculation
@@ -1098,10 +1111,6 @@ enable_user_defined_functions: false
 # This option has no effect, if enable_user_defined_functions is false.
 enable_scripted_user_defined_functions: false
 
-# Enables materialized view creation on this node.
-# Materialized views are considered experimental and are not recommended for production use.
-enable_materialized_views: true
-
 # The default Windows kernel timer and scheduling resolution is 15.6ms for power conservation.
 # Lowering this value on Windows can provide much tighter latency and better throughput, however
 # some virtualized environments may see a negative performance impact from changing this setting
@@ -1235,5 +1244,14 @@ back_pressure_strategy:
 #
 # otc_backlog_expiration_interval_ms: 200
 
-auto_bootstrap: false
 
+#########################
+# EXPERIMENTAL FEATURES #
+#########################
+
+# Enables materialized view creation on this node.
+# Materialized views are considered experimental and are not recommended for production use.
+enable_materialized_views: true
+
+# https://www.digitalocean.com/community/tutorials/how-to-run-a-multi-node-cluster-database-with-cassandra-on-ubuntu-14-04
+auto_bootstrap: false

@@ -14,13 +14,7 @@ CASANDARA_SET_ENV() {
 
 DESTROY() {
 	#Make sure we don't have one already running
-	sudo killall java
-	sudo killall java
-	sleep 2
-	sudo killall java
-	sleep 2
-	sudo killall java
-	sleep 2
+    sudo service cassandra stop;
 }
 
 SETUP() {
@@ -43,9 +37,9 @@ SETUP() {
 	sleep 4
 }
 
-mkdir $CODE
 cd $CODE
-$DESTROY
+DESTROY
 kill -9 `pidof java`
 CASANDARA_SET_ENV
 SETUP
+sudo chown -R $USER ~/butterflyeffect
