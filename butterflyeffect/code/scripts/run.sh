@@ -8,12 +8,11 @@ OPSCNT=500000
 #on its ip.
 
 DESTROY() {
-    sudo service cassandra stop;
+    sudo service cassandra stop
+    sleep 5
 }
 
-
 RUN_CASSANDARA() {
-    #$YCSBHOME/cassandra/start_service.sh
     cd $CSRC
 
     #Delete data folder
@@ -23,20 +22,18 @@ RUN_CASSANDARA() {
     rm -rf $CSRC/data/data
     unlink $CSRC/data
     unlink $SHARED_DATA
-    #ln -s $SHARED_DATA $CSRC/data
     mkdir -p $CSRC/data/data
-    $CSRC/bin/cassandra
-    #/usr/sbin/cassandra 	
-    #/usr/sbin/cassandra "--preferred=1"
-    sleep 5
-}
 
+    # Removed for now
+    #$CSRC/bin/cassandra
+    echo "Beginning Cassandra..."
+    sudo service cassandra start
+    sleep 20
+}
 
 RUN_YCSB() {
 
 	cd $YCSBHOME
-
-	sleep 5
 
 	#Execute these commands to create ycsb keyspace with cassandra db
 	cqlsh 192.168.1.1 -e "create keyspace ycsb WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 }; USE ycsb; create table usertable (y_id varchar primary key, field0 varchar, field1 varchar, field2 varchar,field3 varchar,field4 varchar, field5 varchar, field6 varchar,field7 varchar,field8 varchar,field9 varchar);" #> ~/output
@@ -52,22 +49,11 @@ RUN_YCSB() {
 	$YCSBHOME/bin/ycsb run cassandra2-cql -p hosts=192.168.1.1 -p port=$PORT -p recordcount=$OPSCNT -P $YCSBHOME/workloads/workloada 
 
 	sudo service cassandra stop
-
-	kill -9 `pidof java`
-	kill -9 `pidof java`
 }
 
-
-
-mkdir $CODE
 cd $CODE
-$DESTROY
-kill -9 `pidof java`
-#Install ycsb and casandara
-sleep 5
+DESTROY
+# Run Cassandra and YCSB
 RUN_CASSANDARA
-sleep 5
 RUN_YCSB
-$DESTROY
-
-
+DESTROY
